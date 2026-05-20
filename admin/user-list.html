@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ユーザー一覧 | ロボットレターWEB発注システム</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+    .dot-active { background: #2d7a4f; }
+    .dot-inactive { background: #bbb; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-logo">ロボットレターWEB発注システム</div>
+    <div class="header-user">
+      <div class="user-trigger" id="userTrigger">
+        <div class="user-avatar"></div>
+        <span class="user-name">テストテスト様</span>
+        <span class="dropdown-arrow">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="../logout.html">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="order-list.html" class="nav-item">受注一覧</a>
+        <a href="company-list.html" class="nav-item active">企業一覧</a>
+        <a href="staff-list.html" class="nav-item">社内担当者一覧</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="company-list.html">企業一覧</a>
+          <span>›</span>
+          エクネス株式会社
+          <span>›</span>
+          ユーザー一覧
+        </div>
+        <div class="page-header">
+          <div class="page-title">ユーザー一覧</div>
+          <button class="btn-primary" onclick="openModal('addModal')">＋ ユーザーを追加</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>名前</th>
+                <th>メールアドレス</th>
+                <th>状態</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>藤島 伊音</td>
+                <td>i-fujishima@exness.co.jp</td>
+                <td><span class="status-dot dot-active"></span>有効</td>
+                <td class="table-actions">
+                  <button class="btn-secondary" onclick="openEditModal('藤島 伊音', 'i-fujishima@exness.co.jp', 'active')">編集</button>
+                </td>
+              </tr>
+              <tr>
+                <td>鈴木 次郎</td>
+                <td>j-suzuki@exness.co.jp</td>
+                <td><span class="status-dot dot-active"></span>有効</td>
+                <td class="table-actions">
+                  <button class="btn-secondary" onclick="openEditModal('鈴木 次郎', 'j-suzuki@exness.co.jp', 'active')">編集</button>
+                </td>
+              </tr>
+              <tr>
+                <td>田中 三郎</td>
+                <td>s-tanaka@exness.co.jp</td>
+                <td><span class="status-dot dot-inactive"></span>無効</td>
+                <td class="table-actions">
+                  <button class="btn-secondary" onclick="openEditModal('田中 三郎', 's-tanaka@exness.co.jp', 'inactive')">編集</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination-wrap">
+            <span>Showing data 1 to 3 of 3 entries</span>
+            <div class="pagination">
+              <button class="page-btn active">1</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ユーザー追加モーダル -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('addModal')">×</button>
+      <div class="modal-title">ユーザーの追加</div>
+      <div class="form-group">
+        <label class="form-label">名前</label>
+        <input class="form-input" type="text" placeholder="例：山田 太郎">
+      </div>
+      <div class="form-group">
+        <label class="form-label">メールアドレス</label>
+        <input class="form-input" type="email" placeholder="example@exness.co.jp">
+      </div>
+      <div class="form-group">
+        <label class="form-label">初期パスワード</label>
+        <input class="form-input" type="password" placeholder="8文字以上">
+      </div>
+      <div class="form-group">
+        <label class="form-label">状態</label>
+        <select class="form-select">
+          <option value="active">有効</option>
+          <option value="inactive">無効</option>
+        </select>
+      </div>
+      <button class="btn-full" onclick="alert('ユーザーを追加しました。'); closeModal('addModal')">追加する</button>
+      <a class="modal-cancel-link" onclick="closeModal('addModal')">戻る</a>
+    </div>
+  </div>
+
+  <!-- ユーザー編集モーダル -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('editModal')">×</button>
+      <div class="modal-title">ユーザー情報の変更</div>
+      <div class="form-group">
+        <label class="form-label">名前</label>
+        <input class="form-input" type="text" id="edit-name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">メールアドレス</label>
+        <input class="form-input" type="email" id="edit-email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">状態</label>
+        <select class="form-select" id="edit-status">
+          <option value="active">有効</option>
+          <option value="inactive">無効</option>
+        </select>
+      </div>
+      <button class="btn-full" onclick="alert('変更を保存しました。'); closeModal('editModal')">変更する</button>
+      <a class="modal-cancel-link" onclick="closeModal('editModal')">戻る</a>
+    </div>
+  </div>
+
+  <script>
+    const ut = document.getElementById('userTrigger');
+    const ud = document.getElementById('userDropdown');
+    ut.addEventListener('click', e => { e.stopPropagation(); ud.classList.toggle('open'); });
+    document.addEventListener('click', () => ud.classList.remove('open'));
+
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    function openEditModal(name, email, status) {
+      document.getElementById('edit-name').value = name;
+      document.getElementById('edit-email').value = email;
+      document.getElementById('edit-status').value = status;
+      openModal('editModal');
+    }
+  </script>
+</body>
+</html>

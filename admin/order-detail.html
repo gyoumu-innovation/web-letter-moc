@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>受注詳細 | ロボットレターWEB発注システム</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .order-card { background: #fff; border: 1px solid #d4e4d4; border-radius: 8px; overflow: hidden; margin-bottom: 20px; max-width: 360px; }
+    .order-card-num { background: #364b72; color: #fff; padding: 10px 18px; font-size: 14px; font-weight: bold; }
+    .order-card-body { padding: 12px 18px; font-size: 13px; color: #444; line-height: 1.8; }
+    .accordion { background: #fff; border: 1px solid #dde; border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+    .accordion-header { padding: 13px 18px; display: flex; align-items: center; cursor: pointer; }
+    .accordion-header:hover { background: #f8f8f8; }
+    .acc-arrow { width: 18px; font-size: 11px; color: #364b72; flex-shrink: 0; }
+    .acc-label { font-weight: bold; font-size: 14px; }
+    .acc-summary { font-size: 13px; color: #777; margin-left: 18px; }
+    .accordion-body { padding: 12px 20px 16px; border-top: 1px solid #f0f0f0; display: none; }
+    .accordion-body.open { display: block; }
+    .spec-row { display: flex; padding: 8px 0; border-bottom: 1px solid #f4f4f4; gap: 10px; }
+    .spec-row:last-child { border-bottom: none; }
+    .spec-key { font-size: 12px; color: #888; width: 110px; flex-shrink: 0; }
+    .spec-val { font-size: 13px; flex: 1; }
+    .action-bar { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+    .btn-confirm { padding: 10px 28px; background: #364b72; color: #fff; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; }
+    .btn-confirm:hover { background: #2a3a5a; }
+    .btn-reject { padding: 10px 28px; background: #c0392b; color: #fff; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; }
+    .btn-reject:hover { background: #a93226; }
+    .btn-back { padding: 10px 20px; background: #fff; color: #364b72; border: 1px solid #364b72; border-radius: 4px; font-size: 14px; cursor: pointer; }
+    .spec-heading { font-size: 16px; font-weight: bold; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-logo">ロボットレターWEB発注システム</div>
+    <div class="header-user">
+      <div class="user-trigger" id="userTrigger">
+        <div class="user-avatar"></div>
+        <span class="user-name">テストテスト様</span>
+        <span class="dropdown-arrow">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="../logout.html">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="order-list.html" class="nav-item active">受注一覧</a>
+        <a href="company-list.html" class="nav-item">企業一覧</a>
+        <a href="staff-list.html" class="nav-item">社内担当者一覧</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="order-list.html">受注一覧</a>
+          <span>›</span>
+          受注詳細
+        </div>
+        <div class="detail-header">
+          <h1 style="font-size:20px; font-weight:bold;">受注詳細</h1>
+          <span class="badge badge-orange">未確認</span>
+          <div style="margin-left:auto; display:flex; gap:8px;">
+            <button class="btn-confirm" onclick="alert('確認済みにしました。ステータスが「生産中」に変更されます。')">確認済みにする</button>
+            <button class="btn-reject" onclick="openModal('returnModal')">差し戻す</button>
+          </div>
+        </div>
+
+        <div class="order-card">
+          <div class="order-card-num">注文No.36000-00333</div>
+          <div class="order-card-body">
+            <div>企業名：エクネス株式会社</div>
+            <div>担当者：藤島 伊音</div>
+            <div>封筒＋便箋　333通</div>
+            <div>注文日：2026/01/10</div>
+            <div>発送予定日：2026/02/19</div>
+          </div>
+        </div>
+
+        <div class="spec-heading">仕様情報</div>
+
+        <div class="accordion">
+          <div class="accordion-header" onclick="toggleAcc('acc-envelope')">
+            <span id="acc-envelope-arrow" class="acc-arrow">▶</span>
+            <span class="acc-label">封筒</span>
+            <span class="acc-summary">長3封筒　／　大礼紙</span>
+          </div>
+          <div id="acc-envelope" class="accordion-body">
+            <div class="spec-row"><span class="spec-key">サイズ</span><span class="spec-val">長3封筒</span></div>
+            <div class="spec-row"><span class="spec-key">種類</span><span class="spec-val">大礼紙</span></div>
+            <div class="spec-row"><span class="spec-key">送付方法</span><span class="spec-val">切手を貼り付けて送付（直接発送）</span></div>
+            <div class="spec-row"><span class="spec-key">オプション</span><span class="spec-val">親展印の印字、封筒裏面文言</span></div>
+          </div>
+        </div>
+
+        <div class="accordion">
+          <div class="accordion-header" onclick="toggleAcc('acc-stationery')">
+            <span id="acc-stationery-arrow" class="acc-arrow">▶</span>
+            <span class="acc-label">便箋</span>
+            <span class="acc-summary">縦書き　／　美文字1</span>
+          </div>
+          <div id="acc-stationery" class="accordion-body">
+            <div class="spec-row"><span class="spec-key">書き方</span><span class="spec-val">縦書き</span></div>
+            <div class="spec-row"><span class="spec-key">筆跡</span><span class="spec-val">美文字1</span></div>
+            <div class="spec-row"><span class="spec-key">オプション</span><span class="spec-val">なし</span></div>
+          </div>
+        </div>
+
+        <div class="accordion">
+          <div class="accordion-header" onclick="toggleAcc('acc-sender')">
+            <span id="acc-sender-arrow" class="acc-arrow">▶</span>
+            <span class="acc-label">差出人情報</span>
+            <span class="acc-summary">藤島 伊音　様</span>
+          </div>
+          <div id="acc-sender" class="accordion-body">
+            <div class="spec-row"><span class="spec-key">会社名</span><span class="spec-val">エクネス株式会社</span></div>
+            <div class="spec-row"><span class="spec-key">役職</span><span class="spec-val">代表取締役</span></div>
+            <div class="spec-row"><span class="spec-key">郵便番号</span><span class="spec-val">〒916-0037</span></div>
+            <div class="spec-row"><span class="spec-key">住所</span><span class="spec-val">福井県鯖江市上河端町36-4-3　2階</span></div>
+          </div>
+        </div>
+
+        <div class="accordion">
+          <div class="accordion-header" onclick="toggleAcc('acc-body')">
+            <span id="acc-body-arrow" class="acc-arrow">▶</span>
+            <span class="acc-label">文面</span>
+            <span class="acc-summary">お礼の手紙（パターンA）</span>
+          </div>
+          <div id="acc-body" class="accordion-body">
+            <div class="spec-row"><span class="spec-key">宛名</span><span class="spec-val">あり</span></div>
+            <div class="spec-row" style="flex-direction:column;">
+              <span class="spec-key">本文</span>
+              <div style="background:#f9f9f9; border:1px solid #eee; border-radius:4px; padding:10px; margin-top:6px; font-size:13px; line-height:1.8; white-space:pre-wrap;">拝啓　時下ますますご清栄のこととお慶び申し上げます。
+先日は格別のお引き立てをいただき、誠にありがとうございました。
+今後ともよろしくお願い申し上げます。
+敬具</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion">
+          <div class="accordion-header" onclick="toggleAcc('acc-enclosure')">
+            <span id="acc-enclosure-arrow" class="acc-arrow">▶</span>
+            <span class="acc-label">同梱物</span>
+            <span class="acc-summary">チラシ</span>
+          </div>
+          <div id="acc-enclosure" class="accordion-body">
+            <div class="spec-row"><span class="spec-key">同梱物名</span><span class="spec-val">チラシ（A4・カラー・片面）</span></div>
+            <div class="spec-row"><span class="spec-key">支給方法</span><span class="spec-val">弊社にて印刷して同梱</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <a href="order-list.html"><button class="btn-back">← 受注一覧へ戻る</button></a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 差し戻しモーダル -->
+  <div class="modal-overlay return-modal" id="returnModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('returnModal')">×</button>
+      <div class="modal-title">差し戻し理由を入力してください</div>
+      <div class="form-group">
+        <textarea class="return-textarea" placeholder="差し戻しの理由を入力してください…"></textarea>
+      </div>
+      <button class="btn-return" onclick="alert('差し戻しました。'); closeModal('returnModal')">差し戻す</button>
+      <a class="modal-cancel-link" onclick="closeModal('returnModal')">戻る</a>
+    </div>
+  </div>
+
+  <script>
+    const ut = document.getElementById('userTrigger');
+    const ud = document.getElementById('userDropdown');
+    ut.addEventListener('click', e => { e.stopPropagation(); ud.classList.toggle('open'); });
+    document.addEventListener('click', () => ud.classList.remove('open'));
+
+    function toggleAcc(id) {
+      const body = document.getElementById(id);
+      const arrow = document.getElementById(id + '-arrow');
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      arrow.textContent = isOpen ? '▶' : '▼';
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  </script>
+</body>
+</html>

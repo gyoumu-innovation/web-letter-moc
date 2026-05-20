@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>受注一覧 | ロボットレターWEB発注システム</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .tab-bar { display:flex; gap:0; margin-bottom:20px; }
+    .tab-btn {
+      padding: 9px 28px;
+      border: 1px solid #c0ccd8;
+      background: #fff;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+      color: #555;
+    }
+    .tab-btn:first-child { border-radius: 4px 0 0 4px; }
+    .tab-btn:last-child  { border-radius: 0 4px 4px 0; }
+    .tab-btn + .tab-btn  { border-left: none; }
+    .tab-btn.active      { background: #364b72; color: #fff; border-color: #364b72; }
+    .tab-btn:not(.active):hover { background: #f0f4f8; }
+
+    .filter-area {
+      background: #fff;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .filter-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .filter-item { display:flex; align-items:center; gap:8px; font-size:13px; color:#444; white-space:nowrap; }
+    .filter-date {
+      padding: 7px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      width: 136px;
+      color: #444;
+    }
+    .filter-date:focus { outline: none; border-color: #364b72; }
+    .range-sep { color: #aaa; font-size: 13px; }
+    .filter-input {
+      padding: 7px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      min-width: 160px;
+    }
+    .filter-input:focus { outline: none; border-color: #364b72; }
+    .btn-search {
+      padding: 8px 20px;
+      background: #364b72;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .btn-search:hover { background: #2a3a5a; }
+
+    .order-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .order-card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 16px 20px 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      display: flex;
+      flex-direction: column;
+    }
+    .order-card-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .order-company { font-size: 13px; color: #444; }
+    .order-title { font-size: 18px; font-weight: bold; color: #1a1a1a; margin-bottom: 12px; line-height: 1.4; }
+    .order-detail { font-size: 13px; color: #555; display:flex; flex-direction:column; gap:4px; margin-bottom:16px; flex:1; }
+    .order-detail-row { display:flex; gap:6px; }
+    .order-detail-key { color: #888; min-width: 72px; flex-shrink: 0; }
+    .order-card-foot { text-align: center; }
+    .btn-confirm {
+      padding: 7px 28px;
+      border: 1px solid #364b72;
+      background: #fff;
+      color: #364b72;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-confirm:hover { background: #eef2f8; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-gray   { background: #999;    color: #fff; }
+    .badge-orange { background: #e07820; color: #fff; }
+    .badge-green  { background: #3a7a4a; color: #fff; }
+    .badge-blue   { background: #364b72; color: #fff; }
+
+    .result-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: #888;
+    }
+    .pagination { display:flex; gap:4px; }
+    .page-btn {
+      width: 32px; height: 32px;
+      border: 1px solid #ddd;
+      background: #fff;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .page-btn.active { background: #364b72; color: #fff; border-color: #364b72; }
+    .page-btn:hover:not(.active) { background: #f0f4f8; }
+
+    .empty-state { text-align:center; padding:60px; color:#aaa; font-size:14px; grid-column:1/-1; }
+    .hidden { display:none !important; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="header-logo">ロボットレターWEB発注システム</div>
+      <span style="background:#364b72; color:#fff; font-size:12px; padding:4px 14px; border-radius:4px; font-weight:bold;">管理者用</span>
+    </div>
+    <div class="header-user">
+      <div class="user-trigger" id="userTrigger">
+        <span class="user-name">テストテスト様</span>
+        <span class="dropdown-arrow">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="../logout.html">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="order-list.html"   class="nav-item active">受注一覧</a>
+        <a href="company-list.html" class="nav-item">企業一覧</a>
+        <a href="staff-list.html"   class="nav-item">社内担当者一覧</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="page-title">受注一覧</div>
+
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="all"      onclick="setTab(this)">全ての受注</button>
+          <button class="tab-btn"        data-tab="未確定"   onclick="setTab(this)">未確定</button>
+          <button class="tab-btn"        data-tab="差し戻し" onclick="setTab(this)">差し戻し</button>
+        </div>
+
+        <div class="filter-area">
+          <div class="filter-row">
+            <div class="filter-item">
+              <span>ご注文日で絞り込み</span>
+              <input class="filter-date" type="date" id="filterOrderFrom">
+              <span class="range-sep">〜</span>
+              <input class="filter-date" type="date" id="filterOrderTo">
+            </div>
+            <div class="filter-item">
+              <span>発送予定日で絞り込み</span>
+              <input class="filter-date" type="date" id="filterShipFrom">
+              <span class="range-sep">〜</span>
+              <input class="filter-date" type="date" id="filterShipTo">
+            </div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-item">
+              <span>会社名で検索</span>
+              <input class="filter-input" type="text" id="searchCompany" placeholder="例：エクネス">
+            </div>
+            <div class="filter-item">
+              <span>注文番号で検索</span>
+              <input class="filter-input" type="text" id="searchOrderNo" placeholder="例：36000-00333">
+            </div>
+            <button class="btn-search" onclick="applyFilter()">検索する</button>
+          </div>
+        </div>
+
+        <div class="result-info">
+          <span id="resultCount"></span>
+          <div class="pagination" id="pagination"></div>
+        </div>
+
+        <div class="order-grid" id="orderGrid">
+
+          <div class="order-card" data-status="未確定" data-company="エクネス株式会社" data-no="36000-00340" data-order-date="2026-01-17" data-ship-date="2026-02-20">
+            <div class="order-card-top"><span class="badge badge-gray">未確定</span><span class="order-company">エクネス株式会社</span></div>
+            <div class="order-title">封筒＋便箋×1,000通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00340</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2026年1月17日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送予定日</span><span>：2026年2月20日</span></div>
+            </div>
+            <div class="order-card-foot"><a href="order-detail.html"><button class="btn-confirm">確認する</button></a></div>
+          </div>
+
+          <div class="order-card" data-status="未確定" data-company="エクネス株式会社" data-no="36000-00339" data-order-date="2026-01-15" data-ship-date="2026-02-18">
+            <div class="order-card-top"><span class="badge badge-gray">未確定</span><span class="order-company">エクネス株式会社</span></div>
+            <div class="order-title">封筒＋便箋×500通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00339</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2026年1月15日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送予定日</span><span>：2026年2月18日</span></div>
+            </div>
+            <div class="order-card-foot"><a href="order-detail.html"><button class="btn-confirm">確認する</button></a></div>
+          </div>
+
+          <div class="order-card" data-status="未確定" data-company="テスト株式会社" data-no="36000-00338" data-order-date="2026-01-14" data-ship-date="2026-02-15">
+            <div class="order-card-top"><span class="badge badge-gray">未確定</span><span class="order-company">テスト株式会社</span></div>
+            <div class="order-title">封筒＋便箋×200通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00338</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2026年1月14日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送予定日</span><span>：2026年2月15日</span></div>
+            </div>
+            <div class="order-card-foot"><a href="order-detail.html"><button class="btn-confirm">確認する</button></a></div>
+          </div>
+
+          <div class="order-card" data-status="未確定" data-company="サンプル商事" data-no="36000-00337" data-order-date="2026-01-12" data-ship-date="2026-02-12">
+            <div class="order-card-top"><span class="badge badge-gray">未確定</span><span class="order-company">サンプル商事</span></div>
+            <div class="order-title">封筒＋便箋×800通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00337</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2026年1月12日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送予定日</span><span>：2026年2月12日</span></div>
+            </div>
+            <div class="order-card-foot"><a href="order-detail.html"><button class="btn-confirm">確認する</button></a></div>
+          </div>
+
+          <div class="order-card" data-status="未確定" data-company="エクネス株式会社" data-no="36000-00333" data-order-date="2026-01-10" data-ship-date="2026-02-19">
+            <div class="order-card-top"><span class="badge badge-gray">未確定</span><span class="order-company">エクネス株式会社</span></div>
+            <div class="order-title">封筒＋便箋×333通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00333</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2026年1月10日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送予定日</span><span>：2026年2月19日</span></div>
+            </div>
+            <div class="order-card-foot"><a href="order-detail.html"><button class="btn-confirm">確認する</button></a></div>
+          </div>
+
+          <div class="order-card" data-status="未確定" data-company="エクネス株式会社" data-no="36000-00332" data-order-date="2026-01-08" data-ship-date="2026-02-14">
+            <div class="order-card-top"><span class="badge badge-gray">未確定</span><span class="order-company">エクネス株式会社</span></div>
+            <div class="order-title">封筒＋便箋×333通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00332</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2026年1月8日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送予定日</span><span>：2026年2月14日</span></div>
+            </div>
+            <div class="order-card-foot"><a href="order-detail.html"><button class="btn-confirm">確認する</button></a></div>
+          </div>
+
+          <div class="order-card" data-status="差し戻し" data-company="エクネス株式会社" data-no="36000-00331" data-order-date="2026-01-05" data-ship-date="2026-02-10">
+            <div class="order-card-top"><span class="badge badge-orange">差し戻し</span><span class="order-company">エクネス株式会社</span></div>
+            <div class="order-title">封筒＋便箋×333通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00331</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2026年1月5日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送予定日</span><span>：2026年2月10日</span></div>
+            </div>
+            <div class="order-card-foot" style="display:flex; gap:8px; justify-content:center;">
+              <a href="order-detail.html"><button class="btn-confirm">確認する</button></a>
+              <a href="../入稿作成_統合.html"><button class="btn-confirm" style="border-color:#e07820; color:#e07820;">注文を確認する</button></a>
+            </div>
+          </div>
+
+          <div class="order-card" data-status="差し戻し" data-company="テスト株式会社" data-no="36000-00325" data-order-date="2025-12-28" data-ship-date="2026-02-05">
+            <div class="order-card-top"><span class="badge badge-orange">差し戻し</span><span class="order-company">テスト株式会社</span></div>
+            <div class="order-title">封筒＋便箋×150通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00325</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2025年12月28日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送予定日</span><span>：2026年2月5日</span></div>
+            </div>
+            <div class="order-card-foot" style="display:flex; gap:8px; justify-content:center;">
+              <a href="order-detail.html"><button class="btn-confirm">確認する</button></a>
+              <a href="../入稿作成_統合.html"><button class="btn-confirm" style="border-color:#e07820; color:#e07820;">注文を確認する</button></a>
+            </div>
+          </div>
+
+          <div class="order-card" data-status="差し戻し" data-company="デモ合同会社" data-no="36000-00320" data-order-date="2025-12-22" data-ship-date="2026-01-30">
+            <div class="order-card-top"><span class="badge badge-orange">差し戻し</span><span class="order-company">デモ合同会社</span></div>
+            <div class="order-title">封筒＋便箋×250通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00320</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2025年12月22日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送予定日</span><span>：2026年1月30日</span></div>
+            </div>
+            <div class="order-card-foot" style="display:flex; gap:8px; justify-content:center;">
+              <a href="order-detail.html"><button class="btn-confirm">確認する</button></a>
+              <a href="../入稿作成_統合.html"><button class="btn-confirm" style="border-color:#e07820; color:#e07820;">注文を確認する</button></a>
+            </div>
+          </div>
+
+          <div class="order-card" data-status="生産中" data-company="テスト株式会社" data-no="36000-00330" data-order-date="2025-12-20" data-ship-date="2026-01-28">
+            <div class="order-card-top"><span class="badge badge-green">生産中</span><span class="order-company">テスト株式会社</span></div>
+            <div class="order-title">封筒＋便箋×100通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00330</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2025年12月20日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送予定日</span><span>：2026年1月28日</span></div>
+            </div>
+            <div class="order-card-foot"><a href="order-detail.html"><button class="btn-confirm">確認する</button></a></div>
+          </div>
+
+          <div class="order-card" data-status="生産中" data-company="サンプル商事" data-no="36000-00318" data-order-date="2025-12-15" data-ship-date="2026-01-25">
+            <div class="order-card-top"><span class="badge badge-green">生産中</span><span class="order-company">サンプル商事</span></div>
+            <div class="order-title">封筒＋便箋×600通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00318</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2025年12月15日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送予定日</span><span>：2026年1月25日</span></div>
+            </div>
+            <div class="order-card-foot"><a href="order-detail.html"><button class="btn-confirm">確認する</button></a></div>
+          </div>
+
+          <div class="order-card" data-status="生産中" data-company="エクネス株式会社" data-no="36000-00315" data-order-date="2025-12-10" data-ship-date="2026-01-20">
+            <div class="order-card-top"><span class="badge badge-green">生産中</span><span class="order-company">エクネス株式会社</span></div>
+            <div class="order-title">封筒＋便箋×400通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00315</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2025年12月10日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送予定日</span><span>：2026年1月20日</span></div>
+            </div>
+            <div class="order-card-foot"><a href="order-detail.html"><button class="btn-confirm">確認する</button></a></div>
+          </div>
+
+          <div class="order-card" data-status="発送済み" data-company="サンプル商事" data-no="36000-00329" data-order-date="2025-12-15" data-ship-date="2026-01-20">
+            <div class="order-card-top"><span class="badge badge-blue">発送済み</span><span class="order-company">サンプル商事</span></div>
+            <div class="order-title">封筒＋便箋×500通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00329</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2025年12月15日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送日</span><span>：2026年1月20日</span></div>
+            </div>
+            <div class="order-card-foot"><a href="order-detail.html"><button class="btn-confirm">確認する</button></a></div>
+          </div>
+
+          <div class="order-card" data-status="発送済み" data-company="デモ合同会社" data-no="36000-00305" data-order-date="2025-11-20" data-ship-date="2025-12-25">
+            <div class="order-card-top"><span class="badge badge-blue">発送済み</span><span class="order-company">デモ合同会社</span></div>
+            <div class="order-title">封筒＋便箋×1,200通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00305</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2025年11月20日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送日</span><span>：2025年12月25日</span></div>
+            </div>
+            <div class="order-card-foot"><a href="order-detail.html"><button class="btn-confirm">確認する</button></a></div>
+          </div>
+
+          <div class="order-card" data-status="発送済み" data-company="テスト株式会社" data-no="36000-00300" data-order-date="2025-11-10" data-ship-date="2025-12-15">
+            <div class="order-card-top"><span class="badge badge-blue">発送済み</span><span class="order-company">テスト株式会社</span></div>
+            <div class="order-title">封筒＋便箋×300通</div>
+            <div class="order-detail">
+              <div class="order-detail-row"><span class="order-detail-key">注文番号</span><span>：36000-00300</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">注文日</span><span>：2025年11月10日</span></div>
+              <div class="order-detail-row"><span class="order-detail-key">発送日</span><span>：2025年12月15日</span></div>
+            </div>
+            <div class="order-card-foot"><a href="order-detail.html"><button class="btn-confirm">確認する</button></a></div>
+          </div>
+
+        </div>
+
+        <div class="empty-state hidden" id="emptyState">該当する受注が見つかりませんでした。</div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const CARDS_PER_PAGE = 9;
+    let currentTab  = 'all';
+    let currentPage = 1;
+    let filteredCards = [];
+
+    function setTab(btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTab = btn.dataset.tab;
+      applyFilter();
+    }
+
+    function applyFilter() {
+      const company    = document.getElementById('searchCompany').value.trim().toLowerCase();
+      const orderNo    = document.getElementById('searchOrderNo').value.trim().toLowerCase();
+      const orderFrom  = document.getElementById('filterOrderFrom').value;
+      const orderTo    = document.getElementById('filterOrderTo').value;
+      const shipFrom   = document.getElementById('filterShipFrom').value;
+      const shipTo     = document.getElementById('filterShipTo').value;
+      const allCards   = Array.from(document.querySelectorAll('.order-card'));
+
+      filteredCards = allCards.filter(card => {
+        const tabMatch     = currentTab === 'all' || card.dataset.status === currentTab;
+        const companyMatch = !company  || card.dataset.company.toLowerCase().includes(company);
+        const noMatch      = !orderNo  || card.dataset.no.toLowerCase().includes(orderNo);
+        const orderDateOk  = (!orderFrom || card.dataset.orderDate >= orderFrom)
+                          && (!orderTo   || card.dataset.orderDate <= orderTo);
+        const shipDateOk   = (!shipFrom  || card.dataset.shipDate  >= shipFrom)
+                          && (!shipTo    || card.dataset.shipDate  <= shipTo);
+        return tabMatch && companyMatch && noMatch && orderDateOk && shipDateOk;
+      });
+
+      allCards.forEach(c => c.style.display = 'none');
+      currentPage = 1;
+      renderPage();
+    }
+
+    function renderPage() {
+      const total = filteredCards.length;
+      const start = (currentPage - 1) * CARDS_PER_PAGE;
+      const end   = start + CARDS_PER_PAGE;
+
+      filteredCards.forEach((card, i) => {
+        card.style.display = (i >= start && i < end) ? '' : 'none';
+      });
+
+      const dispStart = total > 0 ? start + 1 : 0;
+      const dispEnd   = Math.min(end, total);
+      document.getElementById('resultCount').textContent =
+        total > 0 ? `${dispStart}〜${dispEnd}件 / 全${total}件` : '0件';
+      document.getElementById('emptyState').classList.toggle('hidden', total > 0);
+
+      renderPagination(total);
+    }
+
+    function renderPagination(total) {
+      const totalPages = Math.ceil(total / CARDS_PER_PAGE);
+      const pg = document.getElementById('pagination');
+      pg.innerHTML = '';
+      if (totalPages <= 1) return;
+
+      const mkBtn = (label, page, active) => {
+        const b = document.createElement('button');
+        b.className = 'page-btn' + (active ? ' active' : '');
+        b.textContent = label;
+        b.onclick = () => { currentPage = page; renderPage(); };
+        return b;
+      };
+
+      if (currentPage > 1) pg.appendChild(mkBtn('‹', currentPage - 1, false));
+      for (let i = 1; i <= totalPages; i++) {
+        pg.appendChild(mkBtn(i, i, i === currentPage));
+      }
+      if (currentPage < totalPages) pg.appendChild(mkBtn('›', currentPage + 1, false));
+    }
+
+    applyFilter();
+
+    ['searchCompany','searchOrderNo'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', e => {
+        if (e.key === 'Enter') applyFilter();
+      });
+    });
+
+    const ut = document.getElementById('userTrigger');
+    const ud = document.getElementById('userDropdown');
+    ut.addEventListener('click', e => { e.stopPropagation(); ud.classList.toggle('open'); });
+    document.addEventListener('click', () => ud.classList.remove('open'));
+  </script>
+</body>
+</html>

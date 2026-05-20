@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>企業一覧 | ロボットレターWEB発注システム</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+    .pagination-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      font-size: 12px;
+      color: #888;
+    }
+    .pagination { display:flex; gap:4px; }
+    .page-btn {
+      width: 32px; height: 32px;
+      border: 1px solid #ddd;
+      background: #fff;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .page-btn.active { background: #364b72; color: #fff; border-color: #364b72; }
+    .page-btn:hover:not(.active) { background: #f0f4f8; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-logo">ロボットレターWEB発注システム</div>
+    <div class="header-user">
+      <div class="user-trigger" id="userTrigger">
+        <div class="user-avatar"></div>
+        <span class="user-name">テストテスト様</span>
+        <span class="dropdown-arrow">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="../logout.html">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="order-list.html"   class="nav-item">受注一覧</a>
+        <a href="company-list.html" class="nav-item active">企業一覧</a>
+        <a href="staff-list.html"   class="nav-item">社内担当者一覧</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="page-header">
+          <div class="page-title">企業一覧</div>
+          <button class="btn-primary" onclick="openModal('registerModal')">＋ 新規企業登録</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>企業名</th>
+                <th>住所</th>
+                <th>ユーザー数</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="companyTableBody"></tbody>
+          </table>
+          <div class="pagination-wrap">
+            <span id="companyCount"></span>
+            <div class="pagination" id="companyPagination"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 企業情報変更モーダル -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('editModal')">×</button>
+      <div class="modal-title">企業情報の変更</div>
+      <div class="form-group">
+        <label class="form-label">会社名</label>
+        <input class="form-input" type="text" id="edit-company-name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">郵便番号</label>
+        <div class="postal-row">
+          <input class="form-input" type="text" id="edit-postal-code" placeholder="〒000-0000" style="max-width:160px;">
+          <button class="btn-secondary" style="white-space:nowrap;">住所検索</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">住所</label>
+        <input class="form-input" type="text" id="edit-address">
+      </div>
+      <div class="form-group">
+        <label class="form-label">建物名・部屋番号</label>
+        <input class="form-input" type="text" id="edit-building">
+      </div>
+      <button class="btn-full" onclick="alert('変更を保存しました。'); closeModal('editModal')">変更する</button>
+      <a class="modal-cancel-link" onclick="closeModal('editModal')">戻る</a>
+    </div>
+  </div>
+
+  <!-- 新規企業登録モーダル -->
+  <div class="modal-overlay" id="registerModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('registerModal')">×</button>
+      <div class="modal-title">新規企業登録</div>
+      <div class="form-group">
+        <label class="form-label">会社名</label>
+        <input class="form-input" type="text" placeholder="例：株式会社〇〇">
+      </div>
+      <div class="form-group">
+        <label class="form-label">郵便番号</label>
+        <div class="postal-row">
+          <input class="form-input" type="text" placeholder="〒000-0000" style="max-width:160px;">
+          <button class="btn-secondary" style="white-space:nowrap;">住所検索</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">住所</label>
+        <input class="form-input" type="text" placeholder="都道府県・市町村・番地">
+      </div>
+      <div class="form-group">
+        <label class="form-label">建物名・部屋番号</label>
+        <input class="form-input" type="text" placeholder="任意">
+      </div>
+      <button class="btn-full" onclick="alert('企業を登録しました。'); closeModal('registerModal')">登録する</button>
+      <a class="modal-cancel-link" onclick="closeModal('registerModal')">戻る</a>
+    </div>
+  </div>
+
+  <!-- 削除確認モーダル -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-card" style="border-top:4px solid #c0392b;">
+      <button class="modal-close" onclick="closeModal('deleteModal')">×</button>
+      <div class="modal-title">企業を削除しますか？</div>
+      <p style="font-size:13px; color:#555; margin-bottom:24px; line-height:1.7;">
+        この企業に紐づくユーザー情報もすべて削除されます。<br>この操作は取り消せません。
+      </p>
+      <button class="btn-return" onclick="alert('削除しました。'); closeModal('deleteModal')">削除する</button>
+      <a class="modal-cancel-link" onclick="closeModal('deleteModal')">戻る</a>
+    </div>
+  </div>
+
+  <script>
+    const COMPANIES = [
+      { name:'エクネス株式会社',      postal:'〒916-0037', address:'福井県鯖江市上河端町36-4-3',     users:6 },
+      { name:'テスト株式会社',         postal:'〒150-0043', address:'東京都渋谷区道玄坂1-2-3',        users:5 },
+      { name:'サンプル商事',           postal:'〒530-0001', address:'大阪府大阪市北区梅田1-1-1',      users:2 },
+      { name:'株式会社サンプル',       postal:'〒460-0003', address:'愛知県名古屋市中区錦2-4-5',      users:1 },
+      { name:'デモ合同会社',           postal:'〒060-0042', address:'北海道札幌市中央区大通西4',      users:4 },
+      { name:'山田商店',               postal:'〒980-0021', address:'宮城県仙台市青葉区中央3-3-1',    users:2 },
+      { name:'株式会社テックワーク',   postal:'〒100-0001', address:'東京都千代田区丸の内1-1-1',      users:8 },
+      { name:'フューチャー株式会社',   postal:'〒220-0012', address:'神奈川県横浜市西区みなとみらい2-2-1', users:3 },
+      { name:'株式会社グローバル',     postal:'〒810-0001', address:'福岡県福岡市中央区天神1-4-2',    users:4 },
+      { name:'合同会社ネクスト',       postal:'〒730-0011', address:'広島県広島市中区基町9-1',        users:1 },
+      { name:'有限会社スター',         postal:'〒430-0929', address:'静岡県浜松市中区海老塚1-12-10',  users:2 },
+      { name:'株式会社リード',         postal:'〒330-0846', address:'埼玉県さいたま市大宮区大門町2-118', users:3 },
+    ];
+
+    const ROWS_PER_PAGE = 5;
+    let companyPage = 1;
+
+    function renderCompanyTable() {
+      const total = COMPANIES.length;
+      const start = (companyPage - 1) * ROWS_PER_PAGE;
+      const end   = Math.min(start + ROWS_PER_PAGE, total);
+      const slice = COMPANIES.slice(start, end);
+
+      const tbody = document.getElementById('companyTableBody');
+      tbody.innerHTML = slice.map(c => `
+        <tr>
+          <td>${c.name}</td>
+          <td>${c.address}</td>
+          <td>${c.users}名</td>
+          <td class="table-actions">
+            <a href="user-list.html"><button class="btn-secondary">ユーザー一覧</button></a>
+            <button class="btn-secondary" onclick="openEditModal('${c.name}','${c.postal}','${c.address}','')">編集</button>
+            <button class="btn-danger" onclick="openModal('deleteModal')">削除</button>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('companyCount').textContent =
+        `${start + 1}〜${end}件 / 全${total}件`;
+
+      renderCompanyPagination(total);
+    }
+
+    function renderCompanyPagination(total) {
+      const totalPages = Math.ceil(total / ROWS_PER_PAGE);
+      const pg = document.getElementById('companyPagination');
+      pg.innerHTML = '';
+
+      const mkBtn = (label, page, active) => {
+        const b = document.createElement('button');
+        b.className = 'page-btn' + (active ? ' active' : '');
+        b.textContent = label;
+        b.onclick = () => { companyPage = page; renderCompanyTable(); };
+        return b;
+      };
+
+      if (companyPage > 1) pg.appendChild(mkBtn('‹', companyPage - 1, false));
+      for (let i = 1; i <= totalPages; i++) {
+        pg.appendChild(mkBtn(i, i, i === companyPage));
+      }
+      if (companyPage < totalPages) pg.appendChild(mkBtn('›', companyPage + 1, false));
+    }
+
+    renderCompanyTable();
+
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    function openEditModal(name, postal, address, building) {
+      document.getElementById('edit-company-name').value = name;
+      document.getElementById('edit-postal-code').value = postal;
+      document.getElementById('edit-address').value = address;
+      document.getElementById('edit-building').value = building;
+      openModal('editModal');
+    }
+
+    const ut = document.getElementById('userTrigger');
+    const ud = document.getElementById('userDropdown');
+    ut.addEventListener('click', e => { e.stopPropagation(); ud.classList.toggle('open'); });
+    document.addEventListener('click', () => ud.classList.remove('open'));
+  </script>
+</body>
+</html>

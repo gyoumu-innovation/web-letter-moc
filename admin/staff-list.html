@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社内担当者一覧 | ロボットレターWEB発注システム</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+    .role-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+    .role-admin { background: #e8f0fe; color: #1a56a0; }
+    .role-staff { background: #f0f0f0; color: #555; }
+    .status-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    .dot-active   { background: #2d7a4f; }
+    .dot-inactive { background: #bbb; }
+    .pagination-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      font-size: 12px;
+      color: #888;
+    }
+    .pagination { display:flex; gap:4px; }
+    .page-btn {
+      width: 32px; height: 32px;
+      border: 1px solid #ddd;
+      background: #fff;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .page-btn.active { background: #364b72; color: #fff; border-color: #364b72; }
+    .page-btn:hover:not(.active) { background: #f0f4f8; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-logo">ロボットレターWEB発注システム</div>
+    <div class="header-user">
+      <div class="user-trigger" id="userTrigger">
+        <div class="user-avatar"></div>
+        <span class="user-name">テストテスト様</span>
+        <span class="dropdown-arrow">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="../logout.html">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="order-list.html"   class="nav-item">受注一覧</a>
+        <a href="company-list.html" class="nav-item">企業一覧</a>
+        <a href="staff-list.html"   class="nav-item active">社内担当者一覧</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="page-header">
+          <div class="page-title">社内担当者一覧</div>
+          <button class="btn-primary" onclick="openModal('addModal')">＋ 担当者を追加</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>名前</th>
+                <th>メールアドレス</th>
+                <th>権限</th>
+                <th>状態</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="staffTableBody"></tbody>
+          </table>
+          <div class="pagination-wrap">
+            <span id="staffCount"></span>
+            <div class="pagination" id="staffPagination"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 担当者追加モーダル -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('addModal')">×</button>
+      <div class="modal-title">社内担当者の追加</div>
+      <div class="form-group">
+        <label class="form-label">名前</label>
+        <input class="form-input" type="text" placeholder="例：山田 太郎">
+      </div>
+      <div class="form-group">
+        <label class="form-label">メールアドレス</label>
+        <input class="form-input" type="email" placeholder="example@exness.co.jp">
+      </div>
+      <div class="form-group">
+        <label class="form-label">権限</label>
+        <select class="form-select">
+          <option value="staff">担当者</option>
+          <option value="admin">管理者</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">初期パスワード</label>
+        <input class="form-input" type="password" placeholder="8文字以上">
+      </div>
+      <button class="btn-full" onclick="alert('担当者を追加しました。'); closeModal('addModal')">追加する</button>
+      <a class="modal-cancel-link" onclick="closeModal('addModal')">戻る</a>
+    </div>
+  </div>
+
+  <!-- 担当者編集モーダル -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('editModal')">×</button>
+      <div class="modal-title">担当者情報の変更</div>
+      <div class="form-group">
+        <label class="form-label">名前</label>
+        <input class="form-input" type="text" id="edit-name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">メールアドレス</label>
+        <input class="form-input" type="email" id="edit-email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">権限</label>
+        <select class="form-select" id="edit-role">
+          <option value="staff">担当者</option>
+          <option value="admin">管理者</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">状態</label>
+        <select class="form-select" id="edit-status">
+          <option value="active">有効</option>
+          <option value="inactive">無効</option>
+        </select>
+      </div>
+      <button class="btn-full" onclick="alert('変更を保存しました。'); closeModal('editModal')">変更する</button>
+      <a class="modal-cancel-link" onclick="closeModal('editModal')">戻る</a>
+    </div>
+  </div>
+
+  <script>
+    const STAFF = [
+      { name:'テスト テスト',   email:'test@exness.co.jp',       role:'admin',  status:'active'   },
+      { name:'山田 花子',       email:'yamada@exness.co.jp',     role:'staff',  status:'active'   },
+      { name:'鈴木 一郎',       email:'suzuki@exness.co.jp',     role:'staff',  status:'active'   },
+      { name:'田中 次郎',       email:'tanaka@exness.co.jp',     role:'staff',  status:'inactive' },
+      { name:'伊藤 三郎',       email:'ito@exness.co.jp',        role:'staff',  status:'active'   },
+      { name:'佐藤 京子',       email:'sato@exness.co.jp',       role:'staff',  status:'active'   },
+      { name:'高橋 美穂',       email:'takahashi@exness.co.jp',  role:'admin',  status:'active'   },
+      { name:'渡辺 隆',         email:'watanabe@exness.co.jp',   role:'staff',  status:'active'   },
+      { name:'小林 恵',         email:'kobayashi@exness.co.jp',  role:'staff',  status:'active'   },
+      { name:'松本 健',         email:'matsumoto@exness.co.jp',  role:'staff',  status:'inactive' },
+    ];
+
+    const ROWS_PER_PAGE = 5;
+    let staffPage = 1;
+
+    function renderStaffTable() {
+      const total = STAFF.length;
+      const start = (staffPage - 1) * ROWS_PER_PAGE;
+      const end   = Math.min(start + ROWS_PER_PAGE, total);
+      const slice = STAFF.slice(start, end);
+
+      const roleBadge = r => r === 'admin'
+        ? '<span class="role-badge role-admin">管理者</span>'
+        : '<span class="role-badge role-staff">担当者</span>';
+      const statusHtml = s => s === 'active'
+        ? '<span class="status-dot dot-active"></span>有効'
+        : '<span class="status-dot dot-inactive"></span>無効';
+
+      document.getElementById('staffTableBody').innerHTML = slice.map(s => `
+        <tr>
+          <td>${s.name}</td>
+          <td>${s.email}</td>
+          <td>${roleBadge(s.role)}</td>
+          <td>${statusHtml(s.status)}</td>
+          <td class="table-actions">
+            <button class="btn-secondary" onclick="openEditModal('${s.name}','${s.email}','${s.role}','${s.status}')">編集</button>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('staffCount').textContent =
+        `${start + 1}〜${end}件 / 全${total}件`;
+
+      renderStaffPagination(total);
+    }
+
+    function renderStaffPagination(total) {
+      const totalPages = Math.ceil(total / ROWS_PER_PAGE);
+      const pg = document.getElementById('staffPagination');
+      pg.innerHTML = '';
+
+      const mkBtn = (label, page, active) => {
+        const b = document.createElement('button');
+        b.className = 'page-btn' + (active ? ' active' : '');
+        b.textContent = label;
+        b.onclick = () => { staffPage = page; renderStaffTable(); };
+        return b;
+      };
+
+      if (staffPage > 1) pg.appendChild(mkBtn('‹', staffPage - 1, false));
+      for (let i = 1; i <= totalPages; i++) {
+        pg.appendChild(mkBtn(i, i, i === staffPage));
+      }
+      if (staffPage < totalPages) pg.appendChild(mkBtn('›', staffPage + 1, false));
+    }
+
+    renderStaffTable();
+
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    function openEditModal(name, email, role, status) {
+      document.getElementById('edit-name').value  = name;
+      document.getElementById('edit-email').value = email;
+      document.getElementById('edit-role').value  = role;
+      document.getElementById('edit-status').value = status;
+      openModal('editModal');
+    }
+
+    const ut = document.getElementById('userTrigger');
+    const ud = document.getElementById('userDropdown');
+    ut.addEventListener('click', e => { e.stopPropagation(); ud.classList.toggle('open'); });
+    document.addEventListener('click', () => ud.classList.remove('open'));
+  </script>
+</body>
+</html>
