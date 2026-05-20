@@ -355,6 +355,79 @@
     .dropdown-menu a { display: block; padding: 13px 18px; color: #333; border-bottom: 1px solid #eee; text-decoration: none; font-size: 13px; }
     .dropdown-menu a:last-child { border-bottom: none; }
     .dropdown-menu a:hover { background: #f5f5f5; }
+
+    /* ===== MOBILE ===== */
+    .header-remaining { display: none; }
+    .mobile-bottom-nav { display: none; }
+
+    @media (max-width: 640px) {
+      /* ヘッダー */
+      .header { padding: 0 12px; height: 48px; gap: 8px; }
+      .header-logo { font-size: 12px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .user-name-text { display: none; }
+      .caret { display: none; }
+      .header-remaining {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: #3d6b3d;
+        color: #fff;
+        border-radius: 14px;
+        padding: 4px 10px;
+        font-size: 11px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .header-remaining strong { font-size: 13px; margin-left: 2px; }
+
+      /* レイアウト */
+      .layout { padding-top: 48px; }
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 16px 12px 76px; }
+
+      /* 注文情報: 縦積み */
+      .order-info-row { flex-direction: column; }
+      .order-card { flex: none; min-width: 0; width: 100%; }
+      .return-panel { width: 100%; }
+
+      /* 差し戻し「編集する」はPC専用 */
+      .return-panel .btn-outline-primary { display: none; }
+
+      /* 仕様アコーディオン内: 画像は下に */
+      .spec-with-img { flex-direction: column; }
+      .spec-img-box { width: 100%; height: 72px; }
+      .spec-img-stationery { width: 100%; height: 72px; writing-mode: horizontal-tb; letter-spacing: normal; }
+
+      /* ボトムナビ */
+      .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: 56px;
+        background: #fff;
+        border-top: 1px solid #ddd;
+        z-index: 300;
+      }
+      .mobile-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        color: #999;
+        font-size: 10px;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        background: none;
+        font-family: inherit;
+        padding: 0;
+        transition: color 0.15s;
+      }
+      .mobile-nav-item.active { color: #4a7a4a; }
+      .mobile-nav-icon { font-size: 22px; line-height: 1; }
+    }
   </style>
 </head>
 <body>
@@ -362,10 +435,11 @@
 <!-- HEADER -->
 <header class="header">
   <div class="header-logo">ロボットレターWEB注文システム</div>
+  <div class="header-remaining">残り <strong>10,000</strong> 通</div>
   <div class="header-user">
     <div class="user-trigger" id="userTrigger">
       <div class="avatar"></div>
-      テストテスト様
+      <span class="user-name-text">テストテスト様</span>
       <span class="caret">▼</span>
     </div>
     <div class="dropdown-menu" id="userDropdown">
@@ -602,6 +676,21 @@
 
   </main>
 </div><!-- /layout -->
+
+<nav class="mobile-bottom-nav">
+  <a href="order-list.html" class="mobile-nav-item active">
+    <span class="mobile-nav-icon">📋</span>
+    <span>注文一覧</span>
+  </a>
+  <a href="sender-info.html" class="mobile-nav-item">
+    <span class="mobile-nav-icon">👤</span>
+    <span>差出人情報</span>
+  </a>
+  <a href="profile.html" class="mobile-nav-item">
+    <span class="mobile-nav-icon">⚙️</span>
+    <span>アカウント</span>
+  </a>
+</nav>
 
 <script>
   /* ===== ステート定義 ===== */
