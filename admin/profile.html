@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ユーザー情報 | ロボットレターWEB発注システム</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .profile-form { max-width: 420px; }
+    .readonly-field {
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #555;
+      width: 100%;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-logo">
+      ロボットレターWEB発注システム
+      <span style="font-size:11px; background:#364b72; color:#fff; border-radius:4px; padding:2px 8px; margin-left:10px; font-weight:bold; vertical-align:middle;">管理者用</span>
+    </div>
+    <div class="header-user">
+      <div class="user-trigger" id="userTrigger">
+        <div class="user-avatar"></div>
+        <span class="user-name">テストテスト様</span>
+        <span class="dropdown-arrow">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="profile.html">ユーザー情報</a>
+        <a href="password-change.html">パスワードの変更</a>
+        <a href="../logout.html">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="order-list.html"   class="nav-item">受注一覧</a>
+        <a href="company-list.html" class="nav-item">企業一覧</a>
+        <a href="staff-list.html"   class="nav-item">社内担当者一覧</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="page-title">会員情報</div>
+        <div class="card" style="max-width:520px; margin-top:20px;">
+          <div class="profile-form">
+
+            <div class="form-group">
+              <label class="form-label">メールアドレス</label>
+              <div class="readonly-field">test@exness.co.jp</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">担当者名</label>
+              <div class="readonly-field">テスト テスト</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">権限</label>
+              <div class="readonly-field">管理者</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const ut = document.getElementById('userTrigger');
+    const ud = document.getElementById('userDropdown');
+    ut.addEventListener('click', e => { e.stopPropagation(); ud.classList.toggle('open'); });
+    document.addEventListener('click', () => ud.classList.remove('open'));
+  </script>
+</body>
+</html>
