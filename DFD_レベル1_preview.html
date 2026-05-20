@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>DFD レベル1 — 注文から発送フロー</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  body { font-family: sans-serif; background: #fff; padding: 24px; }
+  h1 { font-size: 18px; margin-bottom: 16px; }
+  .mermaid { display: flex; justify-content: center; }
+</style>
+</head>
+<body>
+<h1>DFD レベル1 — 注文から発送フロー　v2.0</h1>
+<div class="mermaid">
+flowchart TD
+    classDef entity    fill:#BDD7EE,stroke:#2E75B6,color:#000,font-weight:bold
+    classDef process   fill:#fff,stroke:#555,color:#000
+    classDef datastore fill:#fff,stroke:#555,color:#000
+
+    EE1_top["EE1\n顧客"]:::entity
+
+    subgraph web ["WEB注文システム領域"]
+        P1(["P1\n仕様入力"]):::process
+        P2(["P2\n発送可能日算出"]):::process
+        DS1[("DS1：一時保存DB")]:::datastore
+        P3(["P3\n文面入力"]):::process
+        P4(["P4\n送付リストアップロード"]):::process
+        P5(["P5\nオプション入力"]):::process
+        P6(["P6\n注文受付"]):::process
+        DS2[("DS2：注文DB\n注文情報/発送予定日")]:::datastore
+        P8(["P8\nサンプル文面アップロード"]):::process
+        P9(["P9\nサンプル承認/拒否"]):::process
+    end
+
+    subgraph robosuke ["▼ろぼすけ領域▼"]
+        EE2["EE2\n社内担当者"]:::entity
+        DS3[("DS3：ろぼすけDB")]:::datastore
+        P7(["P7\nサンプル作成"]):::process
+        P10(["P10\nデータ作成"]):::process
+        P11(["P11\n発送日確定"]):::process
+        P12(["P12\n製造・発送"]):::process
+        P13(["P13\n発送通知"]):::process
+    end
+
+    EE1_btm["EE1\n顧客"]:::entity
+
+    EE1_top -->|"仕様情報"| P1
+    P1 -->|"エラー通知"| EE1_top
+    P1 -->|"発送希望日情報"| P2
+    P2 -->|"発送希望日"| DS1
+    P2 -->|"文面"| P3
+    P3 -->|"送付先"| P4
+    P4 -->|"オプション情報"| P5
+    P5 -->|"注文情報"| P6
+    P6 -->|"注文情報登録"| DS2
+    P6 -->|"注文完了通知"| EE1_top
+    P6 -->|"差戻通知（エラー3件以上）"| EE1_top
+    P6 -->|"注文データ（仕様・文面CSV・送付リストCSV）"| DS3
+    P6 -->|"注文通知"| EE2
+    EE2 -->|"注文データ"| P7
+    P7 -->|"サンプル文面"| DS3
+    DS3 -->|"サンプル文面"| P8
+    P8 -->|"サンプル文面"| DS2
+    P8 -->|"アップロード通知"| P9
+    P9 -->|"承諾通知"| EE1_top
+    P9 -->|"拒否"| P1
+
+    %% ── 注文変更フロー（検討中） ──────────────────
+    EE1_top -->|"変更情報"| P14
+    DS2 -->|"現在の注文情報"| P14
+    P14 -->|"注文情報更新"| DS2
+
+    P14 -->|"パターンA：サンプル再作成"| P7
+    P14 -->|"パターンB：発送日再算出"| P11
+
+    DS3 -->|"注文データ（承認済み）"| P10
+    P10 -->|"差戻・ステータス更新"| DS3
+    P10 -->|"製造用データ"| P11
+    P11 -->|"製造指示"| P12
+    P12 -->|"出荷完了情報"| P13
+    P13 -->|"出荷完了情報"| EE1_btm
+</div>
+<script>mermaid.initialize({ startOnLoad: true, theme: 'default' });</script>
+</body>
+</html>

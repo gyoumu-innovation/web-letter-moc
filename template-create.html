@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文面パターンの新規作成 | ロボットレターWEB注文システム</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .breadcrumb { font-size: 13px; color: #888; margin-bottom: 16px; }
+    .breadcrumb a { color: #3d6b3d; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb span { margin: 0 6px; }
+    .form-wrap { background: #fff; border-radius: 6px; padding: 28px 32px; box-shadow: 0 1px 4px rgba(0,0,0,.08); max-width: 640px; }
+    .form-row { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; }
+    .required { color: #c0392b; margin-left: 4px; font-size: 11px; }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #333; margin-bottom: 20px; }
+    .custom-tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .custom-tag { background: #3d6b3d; color: #fff; border: none; border-radius: 20px; padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: inherit; }
+    .custom-tag:hover { background: #2d5a2d; }
+    .preview-btn { background: #fff; border: 1px solid #3d6b3d; color: #3d6b3d; border-radius: 20px; padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: inherit; margin-left: auto; }
+    .preview-btn:hover { background: #edf5ed; }
+    .body-textarea { width: 100%; border: 1px solid #ccc; border-radius: 4px; padding: 10px 12px; font-size: 13px; font-family: inherit; min-height: 200px; resize: vertical; outline: none; }
+    .body-textarea:focus { border-color: #3d6b3d; }
+    .char-count { text-align: right; font-size: 11px; color: #888; margin-top: 4px; }
+    .form-actions { margin-top: 28px; }
+    .btn-submit { width: 100%; padding: 13px; background: #3d6b3d; color: #fff; border: none; border-radius: 4px; font-size: 15px; cursor: pointer; }
+    .btn-submit:hover { background: #2d5a2d; }
+    .back-link { display: block; text-align: center; margin-top: 14px; font-size: 13px; color: #3d6b3d; text-decoration: underline; cursor: pointer; }
+    /* プレビューモーダル */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-card { background:#fff; border-radius:8px; padding:32px 36px; width:560px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,.2); position:relative; }
+    .modal-close { position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:#999; }
+    .modal-close:hover { color:#333; }
+    .modal-title { font-size:17px; font-weight:bold; margin-bottom:20px; }
+    .preview-content { background:#f9f9f9; border:1px solid #eee; border-radius:4px; padding:16px; font-size:13px; line-height:2; white-space:pre-wrap; min-height:120px; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-logo">ロボットレターWEB注文システム</div>
+    <div class="header-user">
+      <div class="user-trigger" id="userTrigger">
+        <div class="user-avatar"></div>
+        <span class="user-name">テストテスト様</span>
+        <span class="dropdown-arrow">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="profile.html">ユーザー情報</a>
+        <a href="password-change.html">パスワードの変更</a>
+        <a href="logout.html">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="入稿作成_統合.html" class="nav-item">新規注文作成</a>
+        <a href="order-list.html" class="nav-item">注文一覧</a>
+        <a href="sender-info.html" class="nav-item">差出人情報</a>
+        <a href="template-list.html" class="nav-item active">文面パターン</a>
+      </nav>
+      <div class="plan-info">
+        <div class="plan-label">プレミアムプラン<br>(2026/01/15まで)</div>
+        <div class="plan-badge">
+          <span>残り通数</span>
+          <strong>10,000</strong>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="breadcrumb">
+          <a href="template-list.html">文面パターン</a>
+          <span>›</span>
+          新規作成
+        </div>
+        <div class="page-title">文面パターンの新規作成</div>
+
+        <div class="form-wrap">
+          <div class="form-row">
+            <label class="form-label" for="template_name">
+              文面の名前<span class="required">必須</span>
+            </label>
+            <input class="form-input" type="text" id="template_name" name="template_name" placeholder="例：お礼の手紙（パターンA）">
+          </div>
+
+          <div class="checkbox-row">
+            <input type="checkbox" id="add_recipient_name" name="add_recipient_name" checked>
+            <label for="add_recipient_name">文頭に宛名を追加する</label>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">本文を入力<span class="required">必須</span></label>
+            <div class="custom-tag-row">
+              <button class="custom-tag" onclick="insertTag('{{custom1}}')">カスタム題名1</button>
+              <button class="custom-tag" onclick="insertTag('{{custom2}}')">カスタム題名2</button>
+              <button class="custom-tag" onclick="insertTag('{{custom3}}')">カスタム題名3</button>
+              <button class="custom-tag" onclick="insertTag('{{custom4}}')">カスタム題名4</button>
+              <button class="preview-btn" onclick="openPreview()">文面プレビュー</button>
+            </div>
+            <textarea class="body-textarea" id="body_text" name="body_text" placeholder="本文をここに入力してください。" oninput="updateCharCount()"></textarea>
+            <div class="char-count" id="charCount">0文字</div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-submit" onclick="location.href='template-list.html'">作成する</button>
+            <a href="template-list.html" class="back-link">前に戻る</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- プレビューモーダル -->
+  <div class="modal-overlay" id="previewModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closePreview()">×</button>
+      <div class="modal-title">文面プレビュー</div>
+      <div class="preview-content" id="previewContent"></div>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script>
+    function insertTag(tag) {
+      const ta = document.getElementById('body_text');
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      ta.value = ta.value.slice(0, start) + tag + ta.value.slice(end);
+      ta.selectionStart = ta.selectionEnd = start + tag.length;
+      ta.focus();
+      updateCharCount();
+    }
+
+    function updateCharCount() {
+      const len = document.getElementById('body_text').value.length;
+      document.getElementById('charCount').textContent = len + '文字';
+    }
+
+    function openPreview() {
+      const body = document.getElementById('body_text').value || '（本文がまだ入力されていません）';
+      const addRecipient = document.getElementById('add_recipient_name').checked;
+      const preview = (addRecipient ? '○○様\n\n' : '') + body;
+      document.getElementById('previewContent').textContent = preview;
+      document.getElementById('previewModal').classList.add('open');
+    }
+
+    function closePreview() {
+      document.getElementById('previewModal').classList.remove('open');
+    }
+  </script>
+</body>
+</html>

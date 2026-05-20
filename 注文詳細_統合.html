@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注文詳細 — 統合プロトタイプ</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+      background: #f4f6f4;
+      color: #222;
+      font-size: 14px;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      background: #fff;
+      border-bottom: 1px solid #dde;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      justify-content: space-between;
+      z-index: 1000;
+    }
+    .header-logo { font-size: 17px; font-weight: bold; }
+    .header-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #444;
+      cursor: pointer;
+    }
+    .avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #bbb;
+    }
+    .caret { font-size: 10px; color: #999; }
+
+    /* ===== LAYOUT ===== */
+    .layout { display: flex; padding-top: 52px; min-height: 100vh; }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 178px;
+      background: #deeade;
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 52px; bottom: 0;
+      overflow-y: auto;
+    }
+    .sidebar-nav { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+    .nav-item {
+      display: block;
+      padding: 9px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #333;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .nav-item:hover { background: #c6d9c6; }
+    .nav-item.active { background: #4d7d57; color: #fff; }
+    .sidebar-footer {
+      padding-top: 14px;
+      border-top: 1px solid #b8ccb8;
+    }
+    .plan-label { font-size: 10px; color: #556; margin-bottom: 4px; }
+    .plan-chip {
+      background: #2c5438;
+      color: #fff;
+      border-radius: 24px;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .plan-chip-text { font-size: 11px; }
+    .plan-chip-count { font-size: 19px; font-weight: bold; }
+
+    /* ===== MAIN ===== */
+    .main {
+      margin-left: 178px;
+      flex: 1;
+      padding: 28px 40px 48px;
+    }
+
+    /* ===== PROTOTYPE SWITCHER ===== */
+    .proto-bar {
+      background: #fffaeb;
+      border: 1.5px dashed #e6b400;
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .proto-label { font-size: 11px; color: #7a5f00; font-weight: bold; white-space: nowrap; }
+    .proto-btn {
+      padding: 4px 14px;
+      border: 1.5px solid #ccc;
+      border-radius: 20px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      color: #444;
+      font-family: inherit;
+      transition: all 0.12s;
+    }
+    .proto-btn:hover { border-color: #888; color: #222; }
+    .proto-btn.active { background: #2c5438; border-color: #2c5438; color: #fff; }
+
+    /* ===== PAGE HEADER ===== */
+    .page-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .page-title { font-size: 22px; font-weight: bold; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #fff;
+    }
+    .badge-green   { background: #4d7d57; }
+    .badge-orange  { background: #d97a27; }
+    .badge-blue    { background: #3a7ab8; }
+    .badge-red     { background: #bf3a2b; }
+    .badge-purple  { background: #7b4fa0; }
+    .badge-gray    { background: #7f8c8d; }
+
+    .ml-auto { margin-left: auto; }
+    .action-group { display: flex; gap: 8px; align-items: center; }
+
+    .btn {
+      padding: 7px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      transition: opacity 0.12s;
+    }
+    .btn:hover { opacity: 0.82; }
+    .btn-primary         { background: #4d7d57; color: #fff; }
+    .btn-danger          { background: #bf3a2b; color: #fff; }
+    .btn-outline-primary { background: #fff; border: 1.5px solid #4d7d57; color: #4d7d57; }
+    .btn-purple          { background: #7b4fa0; color: #fff; }
+
+    /* ===== ORDER INFO AREA ===== */
+    .order-info-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      align-items: flex-start;
+    }
+
+    .order-card {
+      background: #fff;
+      border: 1px solid #d4e4d4;
+      border-radius: 8px;
+      overflow: hidden;
+      flex: 0 0 auto;
+      min-width: 300px;
+    }
+    .order-card-num {
+      background: #2c5438;
+      color: #fff;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+    }
+    .order-card-product {
+      padding: 10px 18px 8px;
+      font-size: 14px;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      border-bottom: 1px solid #efefef;
+    }
+    .product-count { color: #777; font-size: 12px; }
+    .order-card-dates { padding: 10px 18px; }
+    .date-row {
+      display: flex;
+      gap: 4px;
+      font-size: 13px;
+      margin-bottom: 5px;
+      color: #444;
+    }
+    .date-row:last-child { margin-bottom: 0; }
+    .date-label { width: 86px; flex-shrink: 0; color: #777; }
+
+    /* ===== 差し戻し理由パネル ===== */
+    .return-panel {
+      background: #fff;
+      border: 1px solid #e4c8c8;
+      border-radius: 8px;
+      padding: 16px 20px;
+      flex: 1;
+    }
+    .return-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .return-panel-title { font-size: 15px; font-weight: bold; }
+    .return-reason-body { font-size: 13px; color: #555; line-height: 1.75; }
+
+    /* ===== 仕様情報 ===== */
+    .spec-heading {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      color: #222;
+    }
+
+    /* ===== アコーディオン ===== */
+    .accordion {
+      background: #fff;
+      border: 1px solid #d4e4d4;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .accordion-header {
+      padding: 13px 18px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .accordion-header:hover { background: #f8fbf8; }
+    .acc-arrow {
+      width: 18px;
+      font-size: 11px;
+      color: #4d7d57;
+      flex-shrink: 0;
+    }
+    .acc-label { font-weight: bold; font-size: 14px; min-width: 90px; }
+    .acc-summary { font-size: 13px; color: #777; margin-left: 18px; }
+
+    .accordion-body {
+      padding: 4px 20px 16px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .accordion-body.closed { display: none; }
+
+    /* アコーディオン内コンテンツ */
+    .spec-with-img { display: flex; gap: 24px; padding-top: 10px; align-items: flex-start; }
+    .spec-details { flex: 1; }
+
+    .spec-tr {
+      display: flex;
+      align-items: flex-start;
+      padding: 8px 0;
+      border-bottom: 1px solid #f4f4f4;
+      gap: 10px;
+    }
+    .spec-tr:last-child { border-bottom: none; }
+    .spec-th { font-size: 12px; color: #888; width: 110px; flex-shrink: 0; padding-top: 2px; }
+    .spec-td { font-size: 13px; flex: 1; }
+
+    .spec-img-box {
+      width: 128px;
+      height: 96px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #ccc;
+      flex-shrink: 0;
+    }
+    .spec-img-envelope { background: linear-gradient(140deg, #f5e9c8, #e8d5a0); }
+    .spec-img-stationery {
+      background: #fafafa;
+      writing-mode: vertical-rl;
+      font-size: 9px;
+      color: #aaa;
+      letter-spacing: 3px;
+      padding: 8px;
+      width: 110px;
+      height: 148px;
+    }
+
+    .opt-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .opt-row:last-child { margin-bottom: 0; }
+
+    .check-box {
+      width: 14px; height: 14px;
+      border: 1.5px solid #ccc;
+      border-radius: 2px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      flex-shrink: 0;
+    }
+    .check-box.on { background: #4d7d57; border-color: #4d7d57; color: #fff; }
+
+    .body-text-area {
+      background: #f9f9f9;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #444;
+      line-height: 1.75;
+      white-space: pre-wrap;
+      margin-top: 6px;
+    }
+
+    .opt-note {
+      font-size: 12px;
+      color: #555;
+      margin-top: 4px;
+      padding-left: 20px;
+    }
+
+    /* ===== UTILITY ===== */
+    .hidden { display: none !important; }
+    .mt6  { margin-top: 6px; }
+    .mt10 { margin-top: 10px; }
+
+    /* ===== HEADER DROPDOWN ===== */
+    .header-user { position: relative; }
+    .user-trigger { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .dropdown-menu { display: none; position: absolute; top: calc(100% + 4px); right: 0; background: #fff; border: 1px solid #ddd; border-radius: 4px; min-width: 180px; box-shadow: 0 4px 12px rgba(0,0,0,.12); z-index: 300; }
+    .dropdown-menu.open { display: block; }
+    .dropdown-menu a { display: block; padding: 13px 18px; color: #333; border-bottom: 1px solid #eee; text-decoration: none; font-size: 13px; }
+    .dropdown-menu a:last-child { border-bottom: none; }
+    .dropdown-menu a:hover { background: #f5f5f5; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-logo">ロボットレターWEB注文システム</div>
+  <div class="header-user">
+    <div class="user-trigger" id="userTrigger">
+      <div class="avatar"></div>
+      テストテスト様
+      <span class="caret">▼</span>
+    </div>
+    <div class="dropdown-menu" id="userDropdown">
+      <a href="profile.html">ユーザー情報</a>
+      <a href="password-change.html">パスワードの変更</a>
+      <a href="logout.html">ログアウト</a>
+    </div>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-nav">
+      <a class="nav-item" href="入稿作成_統合.html">新規注文作成</a>
+      <a class="nav-item active" href="order-list.html">注文一覧</a>
+      <a class="nav-item" href="sender-info.html">差出人情報</a>
+      <a class="nav-item" href="template-list.html">文面パターン</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="plan-label">プレミアムプラン (2026/01/19まで)</div>
+      <div class="plan-chip">
+        <span class="plan-chip-text">残り通数</span>
+        <span class="plan-chip-count">10,000</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- パンくずリスト -->
+    <div style="font-size:13px;color:#888;margin-bottom:16px;">
+      <a href="order-list.html" style="color:#4d7d57;text-decoration:none;">注文一覧</a>
+      <span style="margin:0 6px;">›</span>
+      注文詳細
+    </div>
+
+    <!-- ★ プロトタイプ用ステート切替（実装時は削除） -->
+    <div class="proto-bar">
+      <span class="proto-label">▶ 画面プロトタイプ — ステート切替：</span>
+      <button class="proto-btn" data-state="mikakunin"   onclick="setState(this)">未確認</button>
+      <button class="proto-btn active" data-state="seisan" onclick="setState(this)">生産中</button>
+      <button class="proto-btn" data-state="kakunin"    onclick="setState(this)">確認待ち</button>
+      <button class="proto-btn" data-state="sashimodoshi" onclick="setState(this)">差し戻し</button>
+      <button class="proto-btn" data-state="hasso"      onclick="setState(this)">発送済み</button>
+    </div>
+
+    <!-- PAGE HEADER -->
+    <div class="page-head">
+      <h1 class="page-title">注文詳細</h1>
+      <span id="statusBadge" class="badge badge-green">生産中</span>
+    </div>
+
+    <!-- 注文情報エリア -->
+    <div class="order-info-row" id="orderInfoRow">
+
+      <!-- 注文カード -->
+      <div class="order-card">
+        <div class="order-card-num">注文No.36000-00333</div>
+        <div class="order-card-product">
+          封筒＋便箋 <span class="product-count">333通</span>
+        </div>
+        <div class="order-card-dates">
+          <div class="date-row">
+            <span class="date-label">注文日　　</span>：2026年12月31日
+          </div>
+          <div class="date-row">
+            <span class="date-label">発送予定日</span>：2026年12月31日
+          </div>
+          <div class="date-row">
+            <span class="date-label">発送日　　</span>：2026年12月31日
+          </div>
+        </div>
+      </div>
+
+      <!-- 差し戻し理由パネル（差し戻し時のみ） -->
+      <div id="returnPanel" class="return-panel hidden">
+        <div class="return-panel-head">
+          <span class="return-panel-title">差し戻し理由</span>
+          <a href="入稿作成_統合.html"><button class="btn btn-outline-primary">編集する</button></a>
+        </div>
+        <div class="return-reason-body">
+          差し戻し理由をここに書きます差し戻し理由をここに書きます差し戻し理由をここに書きます差し戻し理由をここに書きます差し戻し理由をここに書きます差し戻し理由をここに書きます差し戻し理由をここに書きます差し戻し理由をここに書きます
+        </div>
+      </div>
+
+    </div><!-- /order-info-row -->
+
+    <!-- 仕様情報 -->
+    <div class="spec-heading">仕様情報</div>
+
+    <!-- 封筒 -->
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc('acc-envelope')">
+        <span id="acc-envelope-arrow" class="acc-arrow">▶</span>
+        <span class="acc-label">封筒</span>
+        <span class="acc-summary">角2封筒　／　みかん</span>
+      </div>
+      <div id="acc-envelope" class="accordion-body closed">
+        <div class="spec-with-img">
+          <div class="spec-details">
+            <div class="spec-tr">
+              <span class="spec-th">送付方法</span>
+              <span class="spec-td">切手を貼って費用へ</span>
+            </div>
+            <div class="spec-tr">
+              <span class="spec-th">糊付け</span>
+              <span class="spec-td">有</span>
+            </div>
+            <div class="spec-tr">
+              <span class="spec-th">オプション</span>
+              <span class="spec-td">
+                <div class="opt-row"><span class="check-box on">✓</span> 裁断印の印字（＋1円/件）</div>
+                <div class="opt-row"><span class="check-box on">✓</span> 重要印の印字（＋1円/件）</div>
+                <div class="opt-row"><span class="check-box on">✓</span> 封筒裏面文言（20文字以内）＋3通（＋20円/件）</div>
+                <div class="opt-note">あああああああああああ</div>
+              </span>
+            </div>
+          </div>
+          <div class="spec-img-box spec-img-envelope">封筒プレビュー</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 便箋 -->
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc('acc-stationery')">
+        <span id="acc-stationery-arrow" class="acc-arrow">▶</span>
+        <span class="acc-label">便箋</span>
+        <span class="acc-summary">縦書き　／　美文字1</span>
+      </div>
+      <div id="acc-stationery" class="accordion-body closed">
+        <div class="spec-with-img">
+          <div class="spec-details">
+            <div class="spec-tr">
+              <span class="spec-th">便箋書き方</span>
+              <span class="spec-td">縦書き</span>
+            </div>
+            <div class="spec-tr">
+              <span class="spec-th">フォント</span>
+              <span class="spec-td">美文字1</span>
+            </div>
+            <div class="spec-tr">
+              <span class="spec-th">オプション</span>
+              <span class="spec-td">
+                <div class="opt-row"><span class="check-box">　</span> QRコード（シール）の貼付（＋20円/件）</div>
+              </span>
+            </div>
+          </div>
+          <div class="spec-img-box spec-img-stationery">便箋プレビュー</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 差出人情報 -->
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc('acc-sender')">
+        <span id="acc-sender-arrow" class="acc-arrow">▶</span>
+        <span class="acc-label">差出人情報</span>
+        <span class="acc-summary">山田　太郎　様</span>
+      </div>
+      <div id="acc-sender" class="accordion-body closed">
+        <div style="padding-top:8px;">
+          <div class="spec-tr">
+            <span class="spec-th">会社名</span>
+            <span class="spec-td">エクネス株式会社</span>
+          </div>
+          <div class="spec-tr">
+            <span class="spec-th">役職（肩書）</span>
+            <span class="spec-td">代表取締役</span>
+          </div>
+          <div class="spec-tr">
+            <span class="spec-th">郵便番号</span>
+            <span class="spec-td">〒916-0937</span>
+          </div>
+          <div class="spec-tr">
+            <span class="spec-th">都道府県</span>
+            <span class="spec-td">福井県</span>
+          </div>
+          <div class="spec-tr">
+            <span class="spec-th">市町村・番地</span>
+            <span class="spec-td">鯖江市上河端町36-4-3</span>
+          </div>
+          <div class="spec-tr">
+            <span class="spec-th">建物名など</span>
+            <span class="spec-td">2階</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 文面 -->
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc('acc-body')">
+        <span id="acc-body-arrow" class="acc-arrow">▶</span>
+        <span class="acc-label">文面</span>
+        <span class="acc-summary">便箋2枚</span>
+      </div>
+      <div id="acc-body" class="accordion-body closed">
+        <div style="padding-top:8px;">
+          <div class="spec-tr">
+            <span class="spec-th">宛先の有無</span>
+            <span class="spec-td">
+              <div class="opt-row"><span class="check-box">　</span> 文頭に宛名を追加する</div>
+            </span>
+          </div>
+          <div class="spec-tr" style="flex-direction:column;">
+            <span class="spec-th">本文</span>
+            <div class="body-text-area">あああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 同梱物 -->
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAcc('acc-enclosure')">
+        <span id="acc-enclosure-arrow" class="acc-arrow">▶</span>
+        <span class="acc-label">同梱物</span>
+        <span class="acc-summary"></span>
+      </div>
+      <div id="acc-enclosure" class="accordion-body closed">
+        <div style="padding-top:8px;">
+          <div class="spec-tr">
+            <span class="spec-th">同梱物名</span>
+            <span class="spec-td">チラシ・とかとか</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /layout -->
+
+<script>
+  /* ===== ステート定義 ===== */
+  const STATES = {
+    mikakunin:    { label: '未確認',   badgeClass: 'badge-orange', showReturn: false },
+    seisan:       { label: '生産中',   badgeClass: 'badge-green',  showReturn: false },
+    kakunin:      { label: '確認待ち', badgeClass: 'badge-blue',   showReturn: false },
+    sashimodoshi: { label: '差し戻し', badgeClass: 'badge-red',    showReturn: true  },
+    hasso:        { label: '発送済み', badgeClass: 'badge-gray',   showReturn: false },
+  };
+
+  function setState(btn) {
+    document.querySelectorAll('.proto-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const s = STATES[btn.dataset.state];
+
+    // ステータスバッジ更新
+    const badge = document.getElementById('statusBadge');
+    badge.textContent = s.label;
+    badge.className = 'badge ' + s.badgeClass;
+
+    // 差し戻し理由パネル表示制御
+    setVisible('returnPanel', s.showReturn);
+  }
+
+  function setVisible(id, show) {
+    const el = document.getElementById(id);
+    show ? el.classList.remove('hidden') : el.classList.add('hidden');
+  }
+
+  /* ===== アコーディオン ===== */
+  function toggleAcc(id) {
+    const body  = document.getElementById(id);
+    const arrow = document.getElementById(id + '-arrow');
+    const isOpen = !body.classList.contains('closed');
+    if (isOpen) {
+      body.classList.add('closed');
+      arrow.textContent = '▶';
+    } else {
+      body.classList.remove('closed');
+      arrow.textContent = '▼';
+    }
+  }
+
+  /* ===== DROPDOWN ===== */
+  (function() {
+    const ut = document.getElementById('userTrigger');
+    const ud = document.getElementById('userDropdown');
+    if (ut) {
+      ut.addEventListener('click', function(e) { e.stopPropagation(); ud.classList.toggle('open'); });
+      document.addEventListener('click', function() { ud.classList.remove('open'); });
+    }
+  })();
+</script>
+</body>
+</html>

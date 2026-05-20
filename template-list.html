@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文面パターン | ロボットレターWEB注文システム</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .btn-new {
+      padding: 10px 24px;
+      background: #4a7a4a;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-new:hover { background: #3a6a3a; }
+
+    /* 3カラムグリッド */
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .pattern-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 18px 20px 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      display: flex;
+      flex-direction: column;
+    }
+    .pattern-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .pattern-recipient {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .pattern-recipient-check { color: #4a7a4a; font-weight: bold; }
+    .pattern-recipient-none  { color: #bbb; }
+    .pattern-preview {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.7;
+      margin-bottom: 18px;
+      flex: 1;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+    .pattern-actions { display: flex; gap: 8px; }
+
+    .btn-card {
+      padding: 7px 20px;
+      border: 1px solid #4a7a4a;
+      background: #fff;
+      color: #4a7a4a;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-card:hover { background: #f0f8f0; }
+    .btn-card-danger { border-color: #c0392b; color: #c0392b; }
+    .btn-card-danger:hover { background: #fdf0ee; }
+
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:500; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-card { background:#fff; border-radius:8px; padding:32px 36px; width:460px; max-width:95vw; box-shadow:0 8px 32px rgba(0,0,0,.2); position:relative; border-top:4px solid #c0392b; }
+    .modal-close { position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:#999; }
+    .modal-close:hover { color:#333; }
+    .modal-title { font-size:17px; font-weight:bold; margin-bottom:16px; }
+    .modal-body { font-size:13px; color:#555; line-height:1.8; margin-bottom:24px; }
+    .btn-delete { width:100%; padding:12px; background:#c0392b; color:#fff; border:none; border-radius:4px; font-size:15px; cursor:pointer; font-family:inherit; }
+    .btn-delete:hover { background:#a93226; }
+    .modal-cancel-link { display:block; text-align:center; margin-top:12px; font-size:13px; color:#3d6b3d; cursor:pointer; text-decoration:underline; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-logo">ロボットレターWEB注文システム</div>
+    <div class="header-user">
+      <div class="user-trigger" id="userTrigger">
+        <div class="user-avatar"></div>
+        <span class="user-name">テストテスト様</span>
+        <span class="dropdown-arrow">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="profile.html">ユーザー情報</a>
+        <a href="password-change.html">パスワードの変更</a>
+        <a href="logout.html">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="入稿作成_統合.html" class="nav-item">新規注文作成</a>
+        <a href="order-list.html"    class="nav-item">注文一覧</a>
+        <a href="sender-info.html"   class="nav-item">差出人情報</a>
+        <a href="template-list.html" class="nav-item active">文面パターン</a>
+      </nav>
+      <div class="plan-info">
+        <div class="plan-label">プレミアムプラン<br>(2026/01/15まで)</div>
+        <div class="plan-badge">
+          <span>残り通数</span>
+          <strong>10,000</strong>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="page-header">
+          <div class="page-title">文面パターン管理</div>
+          <a href="template-create.html"><button class="btn-new">新規作成</button></a>
+        </div>
+
+        <div class="pattern-grid">
+
+          <div class="pattern-card">
+            <div class="pattern-name">新規顧客向け営業DM</div>
+            <div class="pattern-recipient">
+              <span class="pattern-recipient-check">✓</span>
+              <span>文頭に宛名を追加する</span>
+            </div>
+            <div class="pattern-preview">拝啓　時下ますますご清栄のこととお慶び申し上げます。このたびはご縁をいただき、誠にありがとうございます。弊社のサービスについてご案内申し上げたく、ご連絡いたしました。</div>
+            <div class="pattern-actions">
+              <a href="template-edit.html"><button class="btn-card">変更する</button></a>
+              <button class="btn-card btn-card-danger" onclick="openDeleteModal('新規顧客向け営業DM')">削除する</button>
+            </div>
+          </div>
+
+          <div class="pattern-card">
+            <div class="pattern-name">既存顧客へのお礼状</div>
+            <div class="pattern-recipient">
+              <span class="pattern-recipient-check">✓</span>
+              <span>文頭に宛名を追加する</span>
+            </div>
+            <div class="pattern-preview">拝啓　貴社ますますご繁栄のこととお慶び申し上げます。平素は格別のご愛顧を賜り、心より感謝申し上げます。このたびはご注文いただき、誠にありがとうございました。</div>
+            <div class="pattern-actions">
+              <a href="template-edit.html"><button class="btn-card">変更する</button></a>
+              <button class="btn-card btn-card-danger" onclick="openDeleteModal('既存顧客へのお礼状')">削除する</button>
+            </div>
+          </div>
+
+          <div class="pattern-card">
+            <div class="pattern-name">新商品・サービスご案内</div>
+            <div class="pattern-recipient">
+              <span class="pattern-recipient-check">✓</span>
+              <span>文頭に宛名を追加する</span>
+            </div>
+            <div class="pattern-preview">拝啓　時下ますますご清栄のこととお慶び申し上げます。このたび、弊社では新しいサービスをリリースいたしました。ぜひこの機会にご活用いただければ幸いです。</div>
+            <div class="pattern-actions">
+              <a href="template-edit.html"><button class="btn-card">変更する</button></a>
+              <button class="btn-card btn-card-danger" onclick="openDeleteModal('新商品・サービスご案内')">削除する</button>
+            </div>
+          </div>
+
+          <div class="pattern-card">
+            <div class="pattern-name">年末ご挨拶状</div>
+            <div class="pattern-recipient">
+              <span class="pattern-recipient-none">文頭に宛名を追加する：なし</span>
+            </div>
+            <div class="pattern-preview">拝啓　歳末の候、ますますご清栄のこととお慶び申し上げます。本年も格別のご支援を賜り、誠にありがとうございました。来年も変わらぬご愛顧をお願い申し上げます。</div>
+            <div class="pattern-actions">
+              <a href="template-edit.html"><button class="btn-card">変更する</button></a>
+              <button class="btn-card btn-card-danger" onclick="openDeleteModal('年末ご挨拶状')">削除する</button>
+            </div>
+          </div>
+
+          <div class="pattern-card">
+            <div class="pattern-name">年始ご挨拶状</div>
+            <div class="pattern-recipient">
+              <span class="pattern-recipient-none">文頭に宛名を追加する：なし</span>
+            </div>
+            <div class="pattern-preview">謹んで新年のお慶びを申し上げます。旧年中は格別のご高配を賜り、厚く御礼申し上げます。本年もどうぞよろしくお願い申し上げます。</div>
+            <div class="pattern-actions">
+              <a href="template-edit.html"><button class="btn-card">変更する</button></a>
+              <button class="btn-card btn-card-danger" onclick="openDeleteModal('年始ご挨拶状')">削除する</button>
+            </div>
+          </div>
+
+          <div class="pattern-card">
+            <div class="pattern-name">キャンペーンご案内（秋冬）</div>
+            <div class="pattern-recipient">
+              <span class="pattern-recipient-check">✓</span>
+              <span>文頭に宛名を追加する</span>
+            </div>
+            <div class="pattern-preview">拝啓　秋冷の候、ますますご清祥のこととお慶び申し上げます。このたび、期間限定のキャンペーンを実施いたします。ぜひこの機会にご利用くださいませ。</div>
+            <div class="pattern-actions">
+              <a href="template-edit.html"><button class="btn-card">変更する</button></a>
+              <button class="btn-card btn-card-danger" onclick="openDeleteModal('キャンペーンご案内（秋冬）')">削除する</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 削除確認モーダル -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('deleteModal')">×</button>
+      <div class="modal-title">削除しますか？</div>
+      <p class="modal-body" id="deleteModalBody"></p>
+      <button class="btn-delete" onclick="alert('削除しました。'); closeModal('deleteModal')">削除する</button>
+      <a class="modal-cancel-link" onclick="closeModal('deleteModal')">削除しない</a>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script>
+    function openDeleteModal(name) {
+      document.getElementById('deleteModalBody').textContent =
+        '「' + name + '」を削除します。一度削除したデータは元に戻すことができません。本当に削除してもよろしいですか？';
+      document.getElementById('deleteModal').classList.add('open');
+    }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  </script>
+</body>
+</html>

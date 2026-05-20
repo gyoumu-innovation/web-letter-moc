@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ログイン | ロボットレターWEB注文システム</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      background: #edeae4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+
+    /* ===== カード ===== */
+    .login-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 44px 44px 36px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.09);
+    }
+
+    /* ===== ロゴエリア ===== */
+    .logo-area {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo-icon {
+      display: inline-block;
+      margin-bottom: 14px;
+    }
+
+    .logo-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #1a1a1a;
+      line-height: 1.4;
+      letter-spacing: 0.02em;
+    }
+
+    /* ===== タブ ===== */
+    .login-tabs {
+      display: flex;
+      border-bottom: 2px solid #e8e4df;
+      margin-bottom: 28px;
+    }
+
+    .login-tab {
+      flex: 1;
+      padding: 10px 0;
+      text-align: center;
+      font-size: 13px;
+      cursor: pointer;
+      color: #aaa;
+      border-bottom: 2.5px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.2s;
+      user-select: none;
+    }
+
+    .login-tab.active-user {
+      color: #3d6b3d;
+      border-bottom-color: #3d6b3d;
+      font-weight: bold;
+    }
+
+    .login-tab.active-admin {
+      color: #364b72;
+      border-bottom-color: #364b72;
+      font-weight: bold;
+    }
+
+    /* ===== パネル ===== */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ===== エラーメッセージ ===== */
+    .error-msg {
+      font-size: 12px;
+      color: #c0392b;
+      background: #fdf0ee;
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* ===== フォーム ===== */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #fafaf9;
+    }
+
+    .form-input:focus {
+      border-color: #4a7a4a;
+      background: #fff;
+    }
+
+    .password-wrap {
+      position: relative;
+    }
+
+    .password-wrap .form-input {
+      padding-right: 44px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #aaa;
+      font-size: 16px;
+      user-select: none;
+      transition: color 0.15s;
+    }
+
+    .toggle-password:hover { color: #555; }
+
+    /* ===== チェックボックス ===== */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #555;
+      cursor: pointer;
+    }
+
+    .checkbox-row input { cursor: pointer; accent-color: #3d6b3d; }
+
+    /* ===== ボタン ===== */
+    .btn-login {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 30px;
+      font-size: 15px;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .btn-login:hover { opacity: 0.88; }
+    .btn-login:active { transform: scale(0.98); }
+
+    .btn-login-user  { background: #3d6b3d; color: #fff; }
+    .btn-login-admin { background: #364b72; color: #fff; }
+
+    /* ===== フッターリンク ===== */
+    .login-footer {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .login-footer a {
+      color: #4a7a4a;
+      text-decoration: none;
+    }
+
+    .login-footer a:hover { text-decoration: underline; }
+
+    /* ===== 区切り線 ===== */
+    .spacer { height: 20px; }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+
+    <!-- ロゴエリア -->
+    <div class="logo-area">
+      <div class="logo-icon">
+        <!-- SVGロゴ：ロボットが手紙を持つアイコン -->
+        <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 外枠の円 -->
+          <circle cx="36" cy="36" r="36" fill="#2c5438"/>
+
+          <!-- 封筒本体 -->
+          <rect x="14" y="30" width="44" height="28" rx="4" fill="#fff" fill-opacity="0.15"/>
+          <rect x="14" y="30" width="44" height="28" rx="4" stroke="#fff" stroke-width="1.5" fill="none"/>
+
+          <!-- 封筒 V折り -->
+          <path d="M14 30 L36 46 L58 30" stroke="#fff" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+
+          <!-- ロボットの頭（封筒の上） -->
+          <rect x="26" y="13" width="20" height="18" rx="5" fill="#fff" fill-opacity="0.92"/>
+
+          <!-- ロボットの目（左） -->
+          <rect x="30" y="18" width="4" height="4" rx="1" fill="#2c5438"/>
+          <!-- ロボットの目（右） -->
+          <rect x="38" y="18" width="4" height="4" rx="1" fill="#2c5438"/>
+
+          <!-- ロボットの口（スマイル） -->
+          <path d="M31 26 Q36 30 41 26" stroke="#2c5438" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+          <!-- アンテナ -->
+          <line x1="36" y1="13" x2="36" y2="9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="36" cy="8" r="2" fill="#a8d5a2"/>
+        </svg>
+      </div>
+      <div class="logo-title">
+        ロボットレター<br>WEB注文システム
+      </div>
+    </div>
+
+    <!-- タブ -->
+    <div class="login-tabs">
+      <div class="login-tab active-user" id="tab-user" onclick="switchTab('user')">ユーザー</div>
+      <div class="login-tab" id="tab-admin" onclick="switchTab('admin')">社内担当者</div>
+    </div>
+
+    <!-- ユーザーログインパネル -->
+    <div class="tab-panel active" id="panel-user">
+      <div class="error-msg" id="error-user">
+        メールアドレスまたはパスワードが正しくありません。
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">メールアドレス</label>
+        <input class="form-input" type="email" id="email" name="email_address" placeholder="example@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">パスワード</label>
+        <div class="password-wrap">
+          <input class="form-input" type="password" id="password" name="password" placeholder="パスワードを入力" autocomplete="current-password">
+          <span class="toggle-password" data-target="password">👁</span>
+        </div>
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="remember_me" name="remember_me">
+        ログイン状態を保持する
+      </label>
+
+      <a href="入稿作成_統合.html" class="btn-login btn-login-user">ログイン</a>
+
+      <div class="login-footer">
+        <a href="password-reset-request.html">パスワードをお忘れの方はこちら</a>
+      </div>
+    </div>
+
+    <!-- 社内担当者ログインパネル -->
+    <div class="tab-panel" id="panel-admin">
+      <div class="error-msg" id="error-admin">
+        メールアドレスまたはパスワードが正しくありません。
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="admin-email">メールアドレス</label>
+        <input class="form-input" type="email" id="admin-email" placeholder="example@exness.co.jp" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="admin-password">パスワード</label>
+        <div class="password-wrap">
+          <input class="form-input" type="password" id="admin-password" placeholder="パスワードを入力" autocomplete="current-password">
+          <span class="toggle-password" data-target="admin-password">👁</span>
+        </div>
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="admin-remember_me" name="admin-remember_me">
+        ログイン状態を保持する
+      </label>
+
+      <a href="admin/order-list.html" class="btn-login btn-login-admin">ログイン</a>
+
+      <div class="login-footer">
+        <a href="password-reset-request.html">パスワードをお忘れの方はこちら</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- プロトタイプ デモバー -->
+  <div style="
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #fffbe6; border-top: 2px dashed #e6a817;
+    padding: 8px 16px; display: flex; align-items: center;
+    gap: 8px; flex-wrap: wrap; z-index: 9999; font-size: 12px;
+  ">
+    <span style="color:#b07a00; font-weight:bold; flex-shrink:0;">🔧 デモ:</span>
+    <a href="password-reset-request.html" style="background:#3d6b3d;color:#fff;border-radius:12px;padding:4px 12px;text-decoration:none;">パスワード再設定リクエスト</a>
+    <a href="password-reset-sent.html" style="background:#3d6b3d;color:#fff;border-radius:12px;padding:4px 12px;text-decoration:none;">メール送信完了</a>
+    <a href="password-reset.html" style="background:#3d6b3d;color:#fff;border-radius:12px;padding:4px 12px;text-decoration:none;">パスワード再設定</a>
+    <a href="initial-password.html" style="background:#3d6b3d;color:#fff;border-radius:12px;padding:4px 12px;text-decoration:none;">初回パスワード設定</a>
+    <a href="error-loggedout.html" style="background:#888;color:#fff;border-radius:12px;padding:4px 12px;text-decoration:none;">エラー（ログイン前）</a>
+    <a href="error.html" style="background:#888;color:#fff;border-radius:12px;padding:4px 12px;text-decoration:none;">エラー（ログイン後）</a>
+  </div>
+
+  <script>
+    function switchTab(type) {
+      const tabUser  = document.getElementById('tab-user');
+      const tabAdmin = document.getElementById('tab-admin');
+      const panels   = document.querySelectorAll('.tab-panel');
+
+      tabUser.classList.remove('active-user', 'active-admin');
+      tabAdmin.classList.remove('active-user', 'active-admin');
+      panels.forEach(p => p.classList.remove('active'));
+
+      if (type === 'user') {
+        tabUser.classList.add('active-user');
+      } else {
+        tabAdmin.classList.add('active-admin');
+      }
+      document.getElementById('panel-' + type).classList.add('active');
+    }
+
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.target);
+        input.type = input.type === 'password' ? 'text' : 'password';
+      });
+    });
+  </script>
+</body>
+</html>

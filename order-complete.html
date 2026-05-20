@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注文完了 | ロボットレターWEB注文システム</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .complete-wrap {
+      max-width: 680px;
+    }
+    .complete-hero {
+      background: #fff;
+      border: 1px solid #d4e4d4;
+      border-radius: 8px;
+      padding: 40px 48px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .complete-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #e6f4ea;
+      color: #2d7a4f;
+      font-size: 32px;
+      line-height: 64px;
+      margin: 0 auto 20px;
+    }
+    .complete-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #222;
+      margin-bottom: 8px;
+    }
+    .complete-subtitle {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.7;
+    }
+    .order-summary-box {
+      background: #f8f9f8;
+      border: 1px solid #d4e4d4;
+      border-radius: 6px;
+      padding: 16px 24px;
+      margin: 24px 0;
+      text-align: left;
+    }
+    .order-summary-box .label {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .order-summary-box .value {
+      font-size: 15px;
+      font-weight: bold;
+      color: #222;
+    }
+    .flow-card {
+      background: #fff;
+      border: 1px solid #d4e4d4;
+      border-radius: 8px;
+      padding: 28px 36px;
+      margin-bottom: 20px;
+    }
+    .flow-title {
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .flow-step:last-child {
+      border-bottom: none;
+    }
+    .flow-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #3d6b3d;
+      color: #fff;
+      font-size: 12px;
+      font-weight: bold;
+      line-height: 28px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .flow-text {
+      flex: 1;
+    }
+    .flow-text strong {
+      display: block;
+      font-size: 13px;
+      color: #222;
+      margin-bottom: 2px;
+    }
+    .flow-text span {
+      font-size: 12px;
+      color: #777;
+      line-height: 1.6;
+    }
+    .notice-card {
+      background: #fffbe6;
+      border: 1px solid #f5e07a;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #7a6000;
+      line-height: 1.8;
+    }
+    .notice-card::before {
+      content: "⚠ ";
+      font-size: 14px;
+    }
+    .btn-to-list {
+      display: inline-block;
+      padding: 13px 36px;
+      background: #3d6b3d;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 15px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-to-list:hover {
+      background: #2e5430;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-logo">ロボットレターWEB注文システム</div>
+    <div class="header-user">
+      <div class="user-trigger" id="userTrigger">
+        <div class="user-avatar"></div>
+        <span class="user-name">テストテスト様</span>
+        <span class="dropdown-arrow">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="profile.html">ユーザー情報</a>
+        <a href="password-change.html">パスワードの変更</a>
+        <a href="logout.html">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="入稿作成_統合.html" class="nav-item">新規注文作成</a>
+        <a href="order-list.html" class="nav-item">注文一覧</a>
+        <a href="sender-info.html" class="nav-item">差出人情報</a>
+        <a href="template-list.html" class="nav-item">文面パターン</a>
+      </nav>
+      <div class="plan-info">
+        <div class="plan-label">プレミアムプラン<br>(2026/01/15まで)</div>
+        <div class="plan-badge">
+          <span>残り通数</span>
+          <strong>9,667</strong>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <div class="complete-wrap">
+
+          <div class="complete-hero">
+            <div class="complete-icon">✓</div>
+            <div class="complete-title">ご注文ありがとうございました</div>
+            <p class="complete-subtitle">
+              お申し込みを受け付けました。<br>
+              ご登録のメールアドレスに確認メールをお送りしましたのでご確認ください。
+            </p>
+            <div class="order-summary-box">
+              <div class="label">注文No.</div>
+              <div class="value">36000-00334</div>
+            </div>
+            <div style="font-size:13px; color:#555; text-align:left; line-height:1.8;">
+              <div style="margin-bottom:4px;">封筒＋便箋　333通</div>
+              <div>発送予定日：2026/02/19</div>
+            </div>
+          </div>
+
+          <div class="flow-card">
+            <div class="flow-title">お申し込み以降の流れ</div>
+            <div class="flow-steps">
+              <div class="flow-step">
+                <div class="flow-num">1</div>
+                <div class="flow-text">
+                  <strong>弊社にてデータ確認（未確認 → 生産中）</strong>
+                  <span>ご入力いただいた内容を弊社担当者が確認いたします。内容に問題がなければ「生産中」ステータスに変更されます。差し戻しが発生した場合はメールにてご連絡いたします。</span>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-num">2</div>
+                <div class="flow-text">
+                  <strong>サンプル確認のご案内（生産中 → サンプル確認待ち）</strong>
+                  <span>製造前にサンプル文面をご確認いただきます。サンプルの準備ができましたらメールにてご連絡いたします。マイページからご確認・承認をお願いします。</span>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-num">3</div>
+                <div class="flow-text">
+                  <strong>製造・発送（サンプル承認後）</strong>
+                  <span>サンプルご承認後、製造を開始いたします。発送が完了しましたらメールにてご連絡いたします。</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="notice-card">
+            データ提供・確定日までに送付先リスト（宛名データ）のご提供をお願いいたします。期日を過ぎると発送予定日が変更になる場合があります。
+          </div>
+
+          <div style="text-align:center;">
+            <a href="order-list.html" class="btn-to-list">ご注文一覧へ →</a>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/common.js"></script>
+</body>
+</html>

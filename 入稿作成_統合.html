@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>入稿作成画面 — 統合プロトタイプ</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif; background: #f4f6f4; color: #222; font-size: 14px; }
+
+    /* ===== HEADER ===== */
+    .header { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: #fff; border-bottom: 1px solid #dde; display: flex; align-items: center; padding: 0 24px; justify-content: space-between; z-index: 1000; }
+    .header-logo { font-size: 17px; font-weight: bold; }
+    .header-user { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #444; cursor: pointer; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #bbb; }
+
+    /* ===== LAYOUT ===== */
+    .layout { display: flex; padding-top: 52px; min-height: 100vh; }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar { width: 178px; background: #deeade; padding: 14px 10px; display: flex; flex-direction: column; position: fixed; top: 52px; bottom: 0; overflow-y: auto; }
+    .sidebar-nav { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+    .nav-item { display: block; padding: 9px 14px; border-radius: 6px; text-decoration: none; color: #333; font-size: 13px; cursor: pointer; }
+    .nav-item:hover { background: #c6d9c6; }
+    .nav-item.active { background: #4d7d57; color: #fff; }
+    .sidebar-footer { padding-top: 14px; border-top: 1px solid #b8ccb8; }
+    .plan-label { font-size: 10px; color: #556; margin-bottom: 4px; }
+    .plan-chip { background: #2c5438; color: #fff; border-radius: 24px; padding: 6px 14px; display: flex; align-items: center; justify-content: space-between; }
+    .plan-chip-text { font-size: 11px; }
+    .plan-chip-count { font-size: 19px; font-weight: bold; }
+
+    /* ===== MAIN ===== */
+    .main { margin-left: 178px; flex: 1; padding: 28px 40px 60px; }
+
+    /* ===== PROTO-BAR ===== */
+    .proto-bar { background: #fffaeb; border: 1.5px dashed #e6b400; border-radius: 8px; padding: 10px 16px; margin-bottom: 28px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .proto-label { font-size: 11px; color: #7a5f00; font-weight: bold; white-space: nowrap; }
+    .proto-btn { padding: 3px 10px; border: 1.5px solid #ccc; border-radius: 20px; background: #fff; cursor: pointer; font-size: 11px; color: #444; font-family: inherit; transition: all 0.12s; }
+    .proto-btn:hover { border-color: #888; }
+    .proto-btn.active { background: #2c5438; border-color: #2c5438; color: #fff; }
+
+    /* ===== PAGE TITLE ===== */
+    .page-title { font-size: 22px; font-weight: bold; margin-bottom: 20px; }
+
+    /* ===== STEPPER ===== */
+    .stepper-wrap { background: #e8f2e4; border-radius: 8px; padding: 28px 20px 14px; margin-bottom: 32px; position: relative; }
+    .stepper { display: flex; align-items: flex-start; position: relative; }
+    .stepper::before { content: ''; position: absolute; top: 34px; left: 28px; right: 28px; height: 2px; background: #666; z-index: 0; }
+    .step-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0; z-index: 1; }
+    .step-active-box { background: #fff; border: 2px solid #333; border-radius: 5px; padding: 3px 6px; font-size: 10px; font-weight: bold; white-space: nowrap; margin-bottom: 4px; position: relative; }
+    .step-active-box::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: #333; }
+    .step-spacer { height: 20px; }
+    .step-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #555; background: #555; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; }
+    .step-dot.active { background: #fff; border-color: #333; box-shadow: 0 0 0 2px #fff; }
+    .step-dot.future { background: #bbb; border-color: #bbb; }
+    .step-dot.done { background: #4d7d57; border-color: #4d7d57; color: #fff; font-size: 11px; font-weight: bold; }
+    .step-item { cursor: pointer; }
+    .step-item:hover .step-dot { opacity: 0.75; }
+    .step-label-sm { font-size: 9px; text-align: center; color: #555; line-height: 1.3; max-width: 60px; }
+    .step-label-sm.active { font-weight: bold; color: #222; }
+
+    /* ===== SECTION ===== */
+    .section { margin-bottom: 28px; }
+    .section-title { font-size: 15px; font-weight: bold; display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid #dde; margin-bottom: 14px; }
+    .cond-note { font-size: 11px; color: #888; margin-left: auto; font-weight: normal; }
+    .hint-text { font-size: 12px; color: #666; line-height: 1.6; margin-bottom: 12px; }
+
+    /* ===== CARD SELECTION (封筒サイズ) ===== */
+    .sel-card-row { display: flex; gap: 14px; }
+    .sel-card { border: 2px solid #ddd; border-radius: 8px; padding: 16px; cursor: pointer; display: flex; gap: 14px; align-items: flex-start; flex: 1; transition: border-color 0.15s; background: #fff; }
+    .sel-card:hover { border-color: #9bc; }
+    .sel-card.selected { border-color: #4d7d57; background: #f9fdf9; }
+    .sel-card-img { width: 70px; height: 70px; background: #e0e0e0; border-radius: 4px; flex-shrink: 0; }
+    .sel-card-body { flex: 1; }
+    .sel-card-title { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
+    .sel-card-size { font-size: 11px; color: #888; margin-bottom: 6px; }
+    .sel-card-desc { font-size: 12px; color: #555; line-height: 1.5; }
+
+    /* ===== COLOR GRID ===== */
+    .color-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .color-card { border: 2px solid #ddd; border-radius: 6px; overflow: hidden; cursor: pointer; transition: border-color 0.15s; padding: 6px; background: #fff; }
+    .color-card:hover { border-color: #9bc; }
+    .color-card.selected { border-color: #4d7d57; }
+    .color-img { height: 90px; border-radius: 4px; }
+    .color-name { text-align: center; font-size: 12px; padding: 5px 0 2px; }
+
+    /* ===== DELIVERY CARDS (stacked) ===== */
+    .delivery-card { border: 2px solid #ddd; border-radius: 8px; padding: 14px 16px; cursor: pointer; display: flex; gap: 14px; align-items: flex-start; margin-bottom: 10px; background: #fff; transition: border-color 0.15s; }
+    .delivery-card:hover { border-color: #9bc; }
+    .delivery-card.selected { border-color: #4d7d57; background: #f9fdf9; }
+    .delivery-card-img { width: 56px; height: 56px; background: #e0e0e0; border-radius: 4px; flex-shrink: 0; }
+    .delivery-card-title { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
+    .delivery-card-desc { font-size: 12px; color: #555; line-height: 1.5; }
+
+    /* ===== OPTION CHECK CARD ===== */
+    .opt-card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 10px; background: #fff; }
+    .opt-card.checked-card { border-color: #4d7d57; }
+    .opt-card-head { display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 0; }
+    .opt-card-body { display: flex; gap: 16px; margin-top: 12px; }
+    .opt-card-img { width: 130px; height: 85px; background: #e0e0e0; border-radius: 4px; flex-shrink: 0; }
+    .opt-card-desc { font-size: 12px; color: #555; line-height: 1.6; flex: 1; }
+
+    /* ===== FORM FIELDS ===== */
+    .form-grid { display: grid; grid-template-columns: 130px 1fr; row-gap: 12px; column-gap: 16px; align-items: center; }
+    .form-label { font-size: 13px; color: #444; }
+    .form-input { border: 1px solid #ccc; border-radius: 4px; padding: 8px 10px; font-size: 13px; font-family: inherit; width: 100%; }
+    .form-input:focus { outline: none; border-color: #4d7d57; box-shadow: 0 0 0 2px rgba(77,125,87,0.15); }
+    .form-input.error { border-color: #bf3a2b; }
+    .form-select { border: 1px solid #ccc; border-radius: 4px; padding: 8px 10px; font-size: 13px; font-family: inherit; background: #fff; cursor: pointer; }
+    .form-select:focus { outline: none; border-color: #4d7d57; }
+    .error-msg { font-size: 12px; color: #bf3a2b; margin-top: 2px; }
+
+    /* ===== CHECK BOX ===== */
+    .chk { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; }
+    .chk-box { width: 18px; height: 18px; border: 2px solid #ccc; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .chk-box.on { background: #4d7d57; border-color: #4d7d57; color: #fff; }
+
+    /* ===== RADIO ===== */
+    .radio-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+    .radio-item { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; }
+    .radio-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #ccc; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .radio-dot.on { border-color: #4d7d57; }
+    .radio-dot.on::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #4d7d57; }
+
+    /* ===== DROPDOWN SELECT ===== */
+    .gum-select { border: 1px solid #ccc; border-radius: 4px; padding: 7px 10px; font-size: 13px; font-family: inherit; background: #fff; cursor: pointer; min-width: 160px; }
+
+    /* ===== INLINE PANEL (former modal) ===== */
+    .inline-panel { background: #f6fcf6; border: 1.5px dashed #4d7d57; border-radius: 8px; padding: 20px 24px; margin-top: 12px; }
+    .inline-panel-title { font-size: 15px; font-weight: bold; color: #2c5438; padding-bottom: 12px; border-bottom: 1px solid #c0d8c0; margin-bottom: 16px; }
+
+    /* ===== PATTERN BLOCK ===== */
+    .pattern-block { border: 1px solid #ccd8cc; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; background: #fff; }
+    .pattern-block-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #eef0ee; }
+    .pattern-block-label { font-size: 13px; font-weight: bold; color: #3a5a3a; }
+
+    /* ===== FONT GRID ===== */
+    .font-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .font-card { border: 2px solid #ddd; border-radius: 6px; overflow: hidden; cursor: pointer; transition: border-color 0.15s; background: #fff; }
+    .font-card:hover { border-color: #9bc; }
+    .font-card.selected { border-color: #4d7d57; }
+    .font-sample-wrap { height: 130px; background: #fafafa; display: flex; align-items: center; justify-content: center; position: relative; }
+    .font-sample-text { writing-mode: vertical-rl; font-size: 10px; letter-spacing: 2px; line-height: 1.7; color: #333; padding: 6px; text-align: center; }
+    .font-zoom-btn { position: absolute; bottom: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.9); border: 1px solid #ccc; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; z-index: 2; }
+    .font-name { text-align: center; font-size: 11px; padding: 6px 4px 4px; color: #444; }
+
+    /* ===== FONT MODAL ===== */
+    .font-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 800; align-items: center; justify-content: center; }
+    .font-modal-overlay.open { display: flex; }
+    .font-modal-card { background: #fff; border-radius: 8px; padding: 32px 36px 28px; width: 480px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,.25); position: relative; }
+    .font-modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 22px; cursor: pointer; color: #999; line-height: 1; }
+    .font-modal-close:hover { color: #333; }
+    .font-modal-name { font-size: 18px; font-weight: bold; color: #1a1a1a; display: inline; margin-right: 10px; }
+    .font-modal-sub { font-size: 13px; color: #888; display: inline; }
+    .font-modal-head { padding-bottom: 16px; border-bottom: 1px solid #eee; margin-bottom: 16px; }
+    .font-modal-desc { font-size: 13px; color: #555; line-height: 1.8; margin-bottom: 20px; }
+    .font-modal-sample { background: #fafafa; border: 1px solid #eee; border-radius: 4px; display: flex; justify-content: center; padding: 20px; min-height: 280px; align-items: center; }
+    .font-modal-sample-text { writing-mode: vertical-rl; font-size: 14px; letter-spacing: 4px; line-height: 2; color: #333; }
+
+    /* ===== TEMPLATE CARD ===== */
+    .template-card { background: #fff; border: 1.5px solid #4d7d57; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 20px; align-items: center; }
+    .template-card-body { flex: 1; }
+    .template-card-title { font-size: 14px; font-weight: bold; margin-bottom: 6px; }
+    .template-card-desc { font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 10px; }
+    .template-card-img { width: 150px; height: 85px; background: #e0e0e0; border-radius: 4px; flex-shrink: 0; }
+    .btn-download { background: #fff; border: 1px solid #4d7d57; color: #4d7d57; border-radius: 20px; padding: 5px 14px; font-size: 12px; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+
+    /* ===== SHIPPING TABLE ===== */
+    .ship-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .ship-table th { background: #4d7d57; color: #fff; padding: 8px 16px; text-align: center; }
+    .ship-table td { padding: 7px 16px; text-align: center; border-bottom: 1px solid #eee; }
+    .ship-table tr:nth-child(even) td { background: #f6f6f6; }
+    .ship-table-note { font-size: 11px; color: #888; text-align: center; margin-top: 6px; }
+
+    /* ===== 同梱物 BLOCK ===== */
+    .enclosure-block { border: 1px solid #dde; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; background: #fff; }
+    .enclosure-block-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .enclosure-block-title { font-size: 13px; font-weight: bold; color: #444; }
+    .btn-sm-danger { background: #bf3a2b; color: #fff; border: none; border-radius: 4px; padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: inherit; }
+    .sub-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+    .sub-label { font-size: 13px; color: #444; width: 120px; flex-shrink: 0; }
+    .sub-content { flex: 1; }
+
+    /* ===== SPEC CONFIRM ===== */
+    .spec-rows { width: 100%; }
+    .spec-row-item { display: flex; padding: 11px 0; border-bottom: 1px solid #eee; gap: 20px; }
+    .spec-row-item:last-child { border-bottom: none; }
+    .spec-key { width: 130px; flex-shrink: 0; color: #666; font-size: 13px; }
+    .spec-val { flex: 1; font-size: 13px; line-height: 1.7; }
+
+    /* ===== BUTTONS ===== */
+    .btn { padding: 7px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-family: inherit; transition: opacity 0.12s; }
+    .btn:hover { opacity: 0.82; }
+    .btn-primary { background: #4d7d57; color: #fff; }
+    .btn-outline { background: #fff; border: 1.5px solid #4d7d57; color: #4d7d57; }
+    .btn-danger { background: #bf3a2b; color: #fff; }
+    .btn-file { background: #fff; border: 1px solid #ccc; color: #444; padding: 6px 14px; border-radius: 4px; font-size: 12px; cursor: pointer; font-family: inherit; }
+
+    /* ===== STEP NAV ===== */
+    .step-nav { margin-top: 36px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .btn-next { padding: 14px 0; border-radius: 30px; border: none; cursor: pointer; font-size: 15px; font-family: inherit; background: #2c5438; color: #fff; width: 100%; max-width: 500px; transition: opacity 0.12s; }
+    .btn-next:hover { opacity: 0.85; }
+    .btn-back-link { background: none; border: none; cursor: pointer; font-size: 13px; color: #555; font-family: inherit; }
+    .btn-back-link:hover { text-decoration: underline; }
+
+    /* ===== ADD MORE ===== */
+    .add-more { display: flex; align-items: center; gap: 8px; cursor: pointer; color: #4d7d57; font-size: 13px; padding: 10px 0; margin: 4px 0; }
+    .add-more-circle { width: 24px; height: 24px; border-radius: 50%; background: #4d7d57; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; line-height: 1; flex-shrink: 0; }
+    .add-more:hover .add-more-circle { opacity: 0.82; }
+
+    /* ===== INFO BTN ===== */
+    .info-btn { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; background: #666; color: #fff; border-radius: 50%; font-size: 11px; cursor: pointer; border: none; font-family: inherit; }
+    .info-btn:hover { background: #444; }
+
+    /* ===== CUSTOM TAGS ===== */
+    .custom-tag-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+    .custom-tag { background: #4d7d57; color: #fff; border: none; border-radius: 20px; padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: inherit; }
+    .custom-tag:hover { opacity: 0.85; }
+    .preview-btn { background: #fff; border: 1px solid #4d7d57; color: #4d7d57; border-radius: 20px; padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: inherit; margin-left: auto; }
+    .char-count { text-align: right; font-size: 11px; color: #888; }
+    .body-textarea { width: 100%; border: 1px solid #ccc; border-radius: 4px; padding: 10px 12px; font-size: 13px; font-family: inherit; min-height: 200px; resize: vertical; }
+    .body-textarea:focus { outline: none; border-color: #4d7d57; }
+
+    /* ===== DELIVERY MEMO ===== */
+    .delivery-memo { background: #fff; border: 1px solid #dde; border-radius: 6px; padding: 12px 16px; font-size: 12px; color: #444; line-height: 1.8; margin-top: 16px; }
+
+    /* ===== UTILITY ===== */
+    .hidden { display: none !important; }
+    .divider { border: none; border-top: 1px solid #dde; margin: 20px 0; }
+    .red { color: #bf3a2b; }
+    .input-row { display: flex; align-items: center; gap: 8px; }
+    .unit { font-size: 13px; }
+    .date-input { border: 1px solid #ccc; border-radius: 4px; padding: 8px 10px; font-size: 13px; font-family: inherit; width: 200px; }
+    .register-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .date-confirm { font-size: 14px; font-weight: bold; color: #2c5438; }
+
+    /* ===== HEADER DROPDOWN ===== */
+    .header-user { position: relative; }
+    .user-trigger { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .dropdown-menu { display: none; position: absolute; top: calc(100% + 4px); right: 0; background: #fff; border: 1px solid #ddd; border-radius: 4px; min-width: 180px; box-shadow: 0 4px 12px rgba(0,0,0,.12); z-index: 300; }
+    .dropdown-menu.open { display: block; }
+    .dropdown-menu a { display: block; padding: 13px 18px; color: #333; border-bottom: 1px solid #eee; text-decoration: none; font-size: 13px; }
+    .dropdown-menu a:last-child { border-bottom: none; }
+    .dropdown-menu a:hover { background: #f5f5f5; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-logo">ロボットレターWEB注文システム</div>
+  <div class="header-user">
+    <div class="user-trigger" id="userTrigger">
+      <div class="avatar"></div>
+      テストテスト様 <span style="font-size:10px;color:#999;">▼</span>
+    </div>
+    <div class="dropdown-menu" id="userDropdown">
+      <a href="profile.html">ユーザー情報</a>
+      <a href="password-change.html">パスワードの変更</a>
+      <a href="logout.html">ログアウト</a>
+    </div>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-nav">
+      <a class="nav-item active" href="入稿作成_統合.html">新規注文作成</a>
+      <a class="nav-item" href="order-list.html">注文一覧</a>
+      <a class="nav-item" href="sender-info.html">差出人情報</a>
+      <a class="nav-item" href="template-list.html">文面パターン</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="plan-label">プレミアムプラン (2026/01/19まで)</div>
+      <div class="plan-chip">
+        <span class="plan-chip-text">残り通数</span>
+        <span class="plan-chip-count">10,000</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ★ プロトタイプ用ステップ切替 -->
+    <div class="proto-bar">
+      <span class="proto-label">▶ 画面プロトタイプ — ステップ切替：</span>
+      <button class="proto-btn active" data-step="1" onclick="goToStep(1)">1. 封筒を選ぶ</button>
+      <button class="proto-btn" data-step="2" onclick="goToStep(2)">2. 便箋を選ぶ</button>
+      <button class="proto-btn" data-step="3" onclick="goToStep(3)">3. 差出人情報</button>
+      <button class="proto-btn" data-step="4" onclick="goToStep(4)">4. 発送日/通数</button>
+      <button class="proto-btn" data-step="5" onclick="goToStep(5)">5. 文面／送付先</button>
+      <button class="proto-btn" data-step="6" onclick="goToStep(6)">6. 同梱物の有無</button>
+      <button class="proto-btn" data-step="7" onclick="goToStep(7)">7. お申し込み</button>
+    </div>
+
+    <h1 class="page-title">新規注文作成</h1>
+
+    <!-- STEPPER -->
+    <div class="stepper-wrap">
+      <div class="stepper" id="stepper"></div>
+    </div>
+
+    <!-- ======================================================
+         STEP 1: 封筒を選ぶ
+    ====================================================== -->
+    <div id="step-1" class="step-content">
+
+      <!-- サイズを選ぶ -->
+      <div class="section">
+        <div class="section-title">サイズを選ぶ</div>
+        <div class="sel-card-row">
+          <div class="sel-card selected" onclick="selectCard('env-size', this)">
+            <div class="sel-card-img"></div>
+            <div class="sel-card-body">
+              <div class="sel-card-title">長3封筒</div>
+              <div class="sel-card-size">サイズ：120 × 235mm</div>
+              <div class="sel-card-desc">A4サイズを三つ折りにして封入する事ができる封筒サイズです。</div>
+            </div>
+          </div>
+          <div class="sel-card" onclick="selectCard('env-size', this)">
+            <div class="sel-card-img"></div>
+            <div class="sel-card-body">
+              <div class="sel-card-title">角2封筒　<span style="font-size:12px;font-weight:normal;color:#bf3a2b;">（1通あたり +150円）</span></div>
+              <div class="sel-card-size">サイズ：240 × 332mm</div>
+              <div class="sel-card-desc">A4書類を折らずに封入する事ができる封筒サイズです。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 封筒の種類を選ぶ -->
+      <div class="section">
+        <div class="section-title">
+          封筒の種類を選ぶ
+          <span class="cond-note">※角2封筒の場合は表示しない</span>
+        </div>
+        <div class="color-grid">
+          <div class="color-card selected" onclick="selectCard('env-color', this)">
+            <div class="color-img" style="background: linear-gradient(135deg,#f0ece4,#e8e0d4);"></div>
+            <div class="color-name">大礼紙</div>
+          </div>
+          <div class="color-card" onclick="selectCard('env-color', this)">
+            <div class="color-img" style="background: linear-gradient(135deg,#e8b8a0,#d09080);"></div>
+            <div class="color-name">桜花</div>
+          </div>
+          <div class="color-card" onclick="selectCard('env-color', this)">
+            <div class="color-img" style="background: linear-gradient(135deg,#e8d8b0,#d8c890);"></div>
+            <div class="color-name">小麦</div>
+          </div>
+          <div class="color-card" onclick="selectCard('env-color', this)">
+            <div class="color-img" style="background: linear-gradient(135deg,#b8cce0,#90b0cc);"></div>
+            <div class="color-name">空色</div>
+          </div>
+          <div class="color-card" onclick="selectCard('env-color', this)">
+            <div class="color-img" style="background: linear-gradient(135deg,#d0c8e0,#b8a8cc);"></div>
+            <div class="color-name">ふじ</div>
+          </div>
+          <div class="color-card" onclick="selectCard('env-color', this)">
+            <div class="color-img" style="background: linear-gradient(135deg,#b8c8a0,#98a880);"></div>
+            <div class="color-name">利休</div>
+          </div>
+          <div class="color-card" onclick="selectCard('env-color', this)">
+            <div class="color-img" style="background: linear-gradient(135deg,#f0a040,#e08020);"></div>
+            <div class="color-name">みかん</div>
+          </div>
+          <div class="color-card" onclick="selectCard('env-color', this)">
+            <div class="color-img" style="background: linear-gradient(135deg,#f0e050,#d8c830);"></div>
+            <div class="color-name">水仙</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#888;margin-top:8px;">※封筒の種類によって内容が変わることはございません。</div>
+      </div>
+
+      <!-- 宛先への送付方法を選ぶ -->
+      <div class="section">
+        <div class="section-title">宛先への送付方法を選ぶ</div>
+        <div class="delivery-card" onclick="selectDelivery(this, false)">
+          <div class="delivery-card-img"></div>
+          <div>
+            <div class="delivery-card-title">切手を貼り付けて送付（送付先へ直接発送）</div>
+            <div class="delivery-card-desc">説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト<br>※弊社所在地のある福井県の消印が付きます</div>
+          </div>
+        </div>
+        <div class="delivery-card selected" onclick="selectDelivery(this, false)">
+          <div class="delivery-card-img"></div>
+          <div>
+            <div class="delivery-card-title">料金別納印を押印して送付（送付先へ直接発送）</div>
+            <div class="delivery-card-desc">説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト</div>
+          </div>
+        </div>
+        <div class="delivery-card" onclick="selectDelivery(this, true)">
+          <div class="delivery-card-img"></div>
+          <div>
+            <div class="delivery-card-title">切手を貼り付けて貴社へまとめて納品</div>
+            <div class="delivery-card-desc">説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 納品先住所の入力（「貴社へまとめて納品」選択時のみ） -->
+      <div id="delivery-address-section" class="section hidden">
+        <div class="section-title">
+          納品先住所の入力
+          <span class="cond-note">※「切手を貼り付けて貴社へまとめて納品」を選んだ場合のみ表示する</span>
+        </div>
+        <p class="hint-text">納品先の宛名と住所、電話番号を入力してください。</p>
+        <div class="form-grid" style="max-width:600px;">
+          <span class="form-label">会社名</span>
+          <input class="form-input" type="text" placeholder="">
+          <span class="form-label">お名前</span>
+          <input class="form-input" type="text" placeholder="">
+          <span class="form-label">郵便番号</span>
+          <div class="input-row">
+            <input class="form-input" type="text" placeholder="" style="width:160px;">
+            <button class="btn btn-primary" style="white-space:nowrap;">郵便番号検索</button>
+          </div>
+          <span class="form-label">都道府県</span>
+          <select class="form-select"><option value="">選択してください</option><option>福井県</option><option>東京都</option></select>
+          <span class="form-label">市町村・番地</span>
+          <input class="form-input" type="text">
+          <span class="form-label">建物名など</span>
+          <input class="form-input" type="text">
+          <span class="form-label">電話番号</span>
+          <input class="form-input" type="text">
+        </div>
+      </div>
+
+      <!-- 糊付け（封入封緘）の有無 -->
+      <div id="sealing-section" class="section hidden">
+        <div class="section-title">
+          糊付け（封入封緘）の有無
+          <span class="cond-note">※「切手を貼り付けて貴社へまとめて納品」を選んだ場合のみ表示する</span>
+        </div>
+        <p class="hint-text">説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト</p>
+        <select class="gum-select"><option>糊付け有り</option><option>糊付け無し</option></select>
+      </div>
+
+      <!-- 封筒オプションの選択 -->
+      <div class="section">
+        <div class="section-title">封筒オプションの選択　<span style="font-size:12px;font-weight:normal;color:#888;">（ご希望の項目を選び追加料金をご確認ください）</span></div>
+        <div class="opt-card checked-card">
+          <div class="opt-card-head" onclick="toggleOptCard(this)">
+            <span class="chk-box on">✓</span>
+            <span style="font-size:14px;font-weight:bold;">親展印の印字（＋10円/件）</span>
+          </div>
+          <div class="opt-card-body">
+            <div class="opt-card-img"></div>
+            <div class="opt-card-desc">受取人以外開封しないで欲しい場合は、封筒に「親展」の印字をするのが一般的です。</div>
+          </div>
+        </div>
+        <div class="opt-card">
+          <div class="opt-card-head" onclick="toggleOptCard(this)">
+            <span class="chk-box">　</span>
+            <span style="font-size:14px;font-weight:bold;">重要印の押印（＋10円/件）</span>
+          </div>
+          <div class="opt-card-body">
+            <div class="opt-card-img"></div>
+            <div class="opt-card-desc">オプション内容の説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト</div>
+          </div>
+        </div>
+        <div class="opt-card checked-card">
+          <div class="opt-card-head" onclick="toggleOptCard(this)">
+            <span class="chk-box on">✓</span>
+            <span style="font-size:14px;font-weight:bold;">封筒裏に文言を追加（＋20円/件）</span>
+          </div>
+          <div class="opt-card-body">
+            <div class="opt-card-img"></div>
+            <div style="flex:1;">
+              <div class="opt-card-desc" style="margin-bottom:10px;">20〜25文字、2行まで。説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト</div>
+              <div style="font-size:13px;color:#444;margin-bottom:6px;">追加する文字</div>
+              <input class="form-input" type="text" style="max-width:480px;" placeholder="例：〇〇株式会社より大切なお知らせです">
+              <div style="font-size:11px;color:#888;margin-top:4px;">※項目・入力欄は、このオプションにチェックがあった場合のみ表示する</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-next" onclick="goToStep(2)">一時保存して次へ →</button>
+        <button class="btn-back-link" onclick="goToStep(0)">← ひとつ前に戻る</button>
+      </div>
+    </div><!-- /step-1 -->
+
+
+    <!-- ======================================================
+         STEP 2: 便箋を選ぶ
+    ====================================================== -->
+    <div id="step-2" class="step-content hidden">
+
+      <!-- 縦書き/横書き -->
+      <div class="section">
+        <div class="section-title">縦書き／横書き</div>
+        <p class="hint-text">目上の方や改まった手紙は縦書きが基本です。カジュアルな手紙の場合は横書きが書きやすい印象があります。説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト</p>
+        <select class="gum-select">
+          <option selected>縦書き</option>
+          <option>横書き</option>
+        </select>
+      </div>
+
+      <!-- 筆跡を選ぶ -->
+      <div class="section">
+        <div class="section-title">筆跡を選ぶ　<span style="font-size:11px;font-weight:normal;color:#888;">※縦書き/横書きで選択された日のヤムに切り替わる（いい言い方求む）</span></div>
+        <div class="font-grid">
+          <div class="font-card selected" onclick="selectFont(this, '美文字1')">
+            <div class="font-sample-wrap">
+              <div class="font-sample-text" style="font-family:'YuMincho','Yu Mincho',serif;">いつもお世話になっております。先日はありがとうございました。今後ともよろしくお願い致します。</div>
+              <button class="font-zoom-btn" onclick="event.stopPropagation();showFontDetail('美文字1','整った印象／フォーマル')">🔍</button>
+            </div>
+            <div class="font-name">美文字1</div>
+          </div>
+          <div class="font-card" onclick="selectFont(this, '美文字2')">
+            <div class="font-sample-wrap">
+              <div class="font-sample-text" style="font-family:'HiraMinProN-W3','Hiragino Mincho ProN',serif;">いつもお世話になっております。先日はありがとうございました。今後ともよろしくお願い致します。</div>
+              <button class="font-zoom-btn" onclick="event.stopPropagation();showFontDetail('美文字2','やわらかな印象')">🔍</button>
+            </div>
+            <div class="font-name">美文字2</div>
+          </div>
+          <div class="font-card" onclick="selectFont(this, '男性文字1')">
+            <div class="font-sample-wrap">
+              <div class="font-sample-text" style="font-family:'YuGothic','Yu Gothic',sans-serif;font-weight:bold;">いつもお世話になっております。先日はありがとうございました。今後ともよろしくお願い致します。</div>
+              <button class="font-zoom-btn" onclick="event.stopPropagation();showFontDetail('男性文字1','力強い印象')">🔍</button>
+            </div>
+            <div class="font-name">男性文字1</div>
+          </div>
+          <div class="font-card" onclick="selectFont(this, '男性文字2')">
+            <div class="font-sample-wrap">
+              <div class="font-sample-text" style="font-family:'HiraKakuProN-W6',sans-serif;">いつもお世話になっております。先日はありがとうございました。今後ともよろしくお願い致します。</div>
+              <button class="font-zoom-btn" onclick="event.stopPropagation();showFontDetail('男性文字2','落ち着いた印象')">🔍</button>
+            </div>
+            <div class="font-name">男性文字2</div>
+          </div>
+          <div class="font-card" onclick="selectFont(this, '男性文字3')">
+            <div class="font-sample-wrap">
+              <div class="font-sample-text" style="font-family:serif;font-weight:bold;letter-spacing:3px;">いつもお世話になっております。先日はありがとうございました。今後ともよろしくお願い致します。</div>
+              <button class="font-zoom-btn" onclick="event.stopPropagation();showFontDetail('男性文字3','個性的な印象')">🔍</button>
+            </div>
+            <div class="font-name">男性文字3</div>
+          </div>
+          <div class="font-card" onclick="selectFont(this, '男性文字4')">
+            <div class="font-sample-wrap">
+              <div class="font-sample-text" style="font-family:'YuMincho',serif;font-weight:bold;">いつもお世話になっております。先日はありがとうございました。今後ともよろしくお願い致します。</div>
+              <button class="font-zoom-btn" onclick="event.stopPropagation();showFontDetail('男性文字4','堂々とした印象')">🔍</button>
+            </div>
+            <div class="font-name">男性文字4</div>
+          </div>
+          <div class="font-card" onclick="selectFont(this, '男性文字5')">
+            <div class="font-sample-wrap">
+              <div class="font-sample-text" style="font-family:serif;letter-spacing:2px;">いつもお世話になっております。先日はありがとうございました。今後ともよろしくお願い致します。</div>
+              <button class="font-zoom-btn" onclick="event.stopPropagation();showFontDetail('男性文字5','シンプルな印象')">🔍</button>
+            </div>
+            <div class="font-name">男性文字5</div>
+          </div>
+          <div class="font-card" onclick="selectFont(this, '女性文字1')">
+            <div class="font-sample-wrap">
+              <div class="font-sample-text" style="font-family:'HiraMinProN-W3',serif;font-weight:100;letter-spacing:3px;">いつもお世話になっております。先日はありがとうございました。今後ともよろしくお願い致します。</div>
+              <button class="font-zoom-btn" onclick="event.stopPropagation();showFontDetail('女性文字1','繊細でやさしい印象')">🔍</button>
+            </div>
+            <div class="font-name">女性文字1</div>
+          </div>
+          <div class="font-card" onclick="selectFont(this, '女性文字2')">
+            <div class="font-sample-wrap">
+              <div class="font-sample-text" style="font-family:serif;font-weight:100;">いつもお世話になっております。先日はありがとうございました。今後ともよろしくお願い致します。</div>
+              <button class="font-zoom-btn" onclick="event.stopPropagation();showFontDetail('女性文字2','華やかな印象')">🔍</button>
+            </div>
+            <div class="font-name">女性文字2</div>
+          </div>
+          <div class="font-card" onclick="selectFont(this, '女性文字3')">
+            <div class="font-sample-wrap">
+              <div class="font-sample-text" style="font-family:'HiraKakuProN-W3',sans-serif;font-weight:100;letter-spacing:2px;">いつもお世話になっております。先日はありがとうございました。今後ともよろしくお願い致します。</div>
+              <button class="font-zoom-btn" onclick="event.stopPropagation();showFontDetail('女性文字3','やわらかくきれいな印象')">🔍</button>
+            </div>
+            <div class="font-name">女性文字3</div>
+          </div>
+          <div class="font-card" onclick="selectFont(this, '女性文字4')">
+            <div class="font-sample-wrap">
+              <div class="font-sample-text" style="font-family:'HiraMinProN-W3',serif;letter-spacing:1px;">いつもお世話になっております。先日はありがとうございました。今後ともよろしくお願い致します。</div>
+              <button class="font-zoom-btn" onclick="event.stopPropagation();showFontDetail('女性文字4','上品な印象')">🔍</button>
+            </div>
+            <div class="font-name">女性文字4</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 便箋オプション -->
+      <div class="section">
+        <div class="section-title">便箋オプションの選択　<span style="font-size:12px;font-weight:normal;color:#888;">（ご希望の項目を選び追加料金をご確認ください）</span></div>
+        <div class="opt-card">
+          <div class="opt-card-head" onclick="toggleOptCard(this)">
+            <span class="chk-box">　</span>
+            <span style="font-size:14px;font-weight:bold;">二次元コード（シール）の貼付（＋20円/件）</span>
+          </div>
+          <div class="opt-card-body">
+            <div class="opt-card-img"></div>
+            <div style="flex:1;">
+              <div class="opt-card-desc" style="margin-bottom:10px;">オプション内容の説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト</div>
+              <div style="font-size:13px;color:#444;margin-bottom:6px;">二次元コード読込URL</div>
+              <input class="form-input" type="url" style="max-width:480px;" placeholder="https://...">
+              <div style="font-size:11px;color:#888;margin-top:4px;">○○文字まで</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-next" onclick="goToStep(3)">一時保存して次へ →</button>
+        <button class="btn-back-link" onclick="goToStep(1)">← ひとつ前に戻る</button>
+      </div>
+    </div><!-- /step-2 -->
+
+
+    <!-- ======================================================
+         STEP 3: 差出人情報の入力
+    ====================================================== -->
+    <div id="step-3" class="step-content hidden">
+
+      <div class="section">
+        <div class="section-title">差出人情報の入力　<span style="font-size:12px;font-weight:normal;color:#888;">差出人が複数人いる場合は、新規注文として立ててね。。。。</span></div>
+        <p class="hint-text">説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト</p>
+
+        <div class="register-row">
+          <span style="font-size:13px;color:#444;">保存済みデータを使用</span>
+          <select class="form-select" style="min-width:200px;"><option value="">選択してください</option><option>山田 太郎（エクネス株式会社）</option></select>
+          <button class="btn btn-primary" onclick="openSenderModal()">登録する</button>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-next" onclick="goToStep(4)">一時保存して次へ →</button>
+        <button class="btn-back-link" onclick="goToStep(2)">← ひとつ前に戻る</button>
+      </div>
+    </div><!-- /step-3 -->
+
+
+    <!-- ======================================================
+         STEP 4: 発送日/通数を選ぶ
+    ====================================================== -->
+    <div id="step-4" class="step-content hidden">
+
+
+      <!-- 通数 -->
+      <div class="section">
+        <div class="section-title">発送したい通数をご記入ください。</div>
+        <div class="input-row">
+          <input class="form-input error" type="number" style="width:200px;" placeholder="">
+          <span class="unit">通</span>
+        </div>
+        <div class="error-msg">残り通数が不足しています。</div>
+      </div>
+
+      <!-- 発送日 -->
+      <div class="section">
+        <div class="section-title">ご希望の発送日をご記入ください。</div>
+        <input class="date-input" type="date">
+      </div>
+
+      <!-- 納品日（一括発送の場合） -->
+      <div class="section">
+        <div class="section-title">ご希望の納品日をご記入ください。<span class="cond-note">※一括発送の場合表示させる</span></div>
+        <input class="date-input" type="date">
+      </div>
+
+      <!-- データ提供&確定日 + 納期表インライン -->
+      <div class="section">
+        <div style="display:flex;align-items:center;gap:8px;font-size:14px;">
+          データ提供＆確定日の目安は、
+          <span class="date-confirm">2026/01/31</span>
+          です。
+          <button class="info-btn" onclick="openShippingModal()">ℹ</button>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:4px;">※データ確定日を基準とし、翌営業日から起算して発送日を確定します。</div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-next" onclick="goToStep(5)">一時保存して次へ →</button>
+        <button class="btn-back-link" onclick="goToStep(3)">← ひとつ前に戻る</button>
+      </div>
+    </div><!-- /step-4 -->
+
+
+    <!-- ======================================================
+         STEP 5: 文面の作成
+    ====================================================== -->
+    <div id="step-5" class="step-content hidden">
+
+      <!-- 送付リストテンプレート -->
+      <div class="template-card" style="margin-bottom:28px;">
+        <div class="template-card-body">
+          <div class="template-card-title">送付リストテンプレートはこちら</div>
+          <div class="template-card-desc">説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト説明テキスト</div>
+          <button class="btn-download">データ（zip）をダウンロード　↓</button>
+        </div>
+        <div class="template-card-img"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">文面の入力</div>
+
+        <div id="pattern-blocks">
+          <!-- パターン①（固定） -->
+          <div class="pattern-block">
+            <div class="pattern-block-head">
+              <span class="pattern-block-label">文面パターン①</span>
+              <button class="btn-sm-danger" onclick="deletePatternBlock(this)">削除する</button>
+            </div>
+            <div class="register-row" style="margin-bottom:10px;">
+              <span style="font-size:13px;color:#444;">保存済みデータを使用</span>
+              <select class="form-select" style="min-width:200px;"><option value="">選択してください</option><option>お礼の手紙（パターンA）</option></select>
+              <button class="btn btn-primary" onclick="openTextModal()">登録する</button>
+            </div>
+            <div class="register-row">
+              <span style="font-size:13px;color:#444;">送付先リストをアップロード</span>
+              <button class="btn-file">ファイルを選択</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- + 追加ボタン -->
+        <div class="add-more" id="add-pattern-btn" onclick="addPatternBlock()">
+          <div class="add-more-circle">＋</div>
+          <span>文面パターン追加する</span>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-next" onclick="goToStep(6)">一時保存して次へ →</button>
+        <button class="btn-back-link" onclick="goToStep(4)">← ひとつ前に戻る</button>
+      </div>
+    </div><!-- /step-5 -->
+
+
+    <!-- ======================================================
+         STEP 7: 同梱物の有無
+    ====================================================== -->
+    <div id="step-6" class="step-content hidden">
+
+      <div class="section">
+        <div class="section-title">同梱物</div>
+
+        <div id="enclosure-blocks"></div>
+
+        <div class="add-more" id="add-enclosure-btn" onclick="addEnclosureBlock()">
+          <div class="add-more-circle">＋</div>
+          <span>同梱物を追加する</span>
+        </div>
+
+        <!-- 納品メモ -->
+        <div class="delivery-memo" id="enclosure-memo" style="display:none;">
+          〇月〇日までに送ってくださいのような記載<br>
+          <span style="color:#bf3a2b;">&lt;同封物送付先&gt;<br>〒916-0037<br>福井県鯖江市上河端町36-4-3 2F<br>エクネス株式会社　同梱物受付係</span>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-next" onclick="goToStep(7)">一時保存して次へ →</button>
+        <button class="btn-back-link" onclick="goToStep(5)">← ひとつ前に戻る</button>
+      </div>
+    </div><!-- /step-6 -->
+
+
+    <!-- ======================================================
+         STEP 8: お申し込み
+    ====================================================== -->
+    <div id="step-7" class="step-content hidden">
+
+      <div class="section">
+        <div class="section-title">仕様の確認</div>
+        <div class="spec-rows">
+          <div class="spec-row-item">
+            <span class="spec-key">封筒</span>
+            <div class="spec-val">
+              長3封筒<br>大礼紙<br>切手を貼り付けて送付（送付先へ直接発送）
+            </div>
+          </div>
+          <div class="spec-row-item">
+            <span class="spec-key">便箋</span>
+            <div class="spec-val">
+              縦書き<br>美文字1<br>切手を貼り付けて送付（送付先へ直接発送）
+            </div>
+          </div>
+          <div class="spec-row-item">
+            <span class="spec-key">差出人情報</span>
+            <div class="spec-val">
+              エクネス株式会社<br>藤嶋伊音<br>〒916-0037<br>福井県鯖江市上河端町36-4-3　2階
+            </div>
+          </div>
+          <div class="spec-row-item">
+            <span class="spec-key">発送通数</span>
+            <div class="spec-val" style="font-size:16px;font-weight:bold;">000000　件</div>
+          </div>
+          <div class="spec-row-item">
+            <span class="spec-key">オプション金額</span>
+            <div class="spec-val">
+              <span style="font-size:16px;font-weight:bold;">000000　円（税込）</span><br>
+              <span style="font-size:12px;color:#666;">〇〇オプション　10,000円（税込）<br>〇〇オプション　10,000円（税込）<br>〇〇オプション　10,000円（税込）</span>
+            </div>
+          </div>
+          <div class="spec-row-item">
+            <span class="spec-key">データ提供＆確定日の目安</span>
+            <div class="spec-val">2026/01/31</div>
+          </div>
+          <div class="spec-row-item">
+            <span class="spec-key">ご希望の発送日</span>
+            <div class="spec-val">2026/02/19</div>
+          </div>
+        </div>
+      </div>
+
+
+<div class="step-nav">
+        <a href="order-complete.html"><button class="btn-next">お申し込みを送信する →</button></a>
+        <button class="btn-back-link" onclick="goToStep(6)">← ひとつ前に戻る</button>
+      </div>
+    </div><!-- /step-7 -->
+
+  </main>
+</div><!-- /layout -->
+
+<script>
+  /* ===== STEPPER DATA ===== */
+  const STEPS = [
+    '封筒を選ぶ',
+    '便箋を選ぶ',
+    '差出人情報\nの入力',
+    '発送日/通数\nを選ぶ',
+    '文面／\n送付先',
+    '同梱物の有無',
+    'お申し込み',
+  ];
+  let currentStep = 1;
+
+  /* ===== STEPPER RENDER ===== */
+  function renderStepper(active) {
+    const wrap = document.getElementById('stepper');
+    wrap.innerHTML = '';
+
+    STEPS.forEach((label, i) => {
+      const n = i + 1;
+      const isActive = n === active;
+      const isDone   = n < active;
+
+      const item = document.createElement('div');
+      item.className = 'step-item';
+
+      if (isActive) {
+        const box = document.createElement('div');
+        box.className = 'step-active-box';
+        box.textContent = label.replace('\n', ' ');
+        item.appendChild(box);
+      } else {
+        const sp = document.createElement('div');
+        sp.className = 'step-spacer';
+        item.appendChild(sp);
+      }
+
+      const dot = document.createElement('div');
+      dot.className = 'step-dot' + (isActive ? ' active' : isDone ? ' done' : ' future');
+      if (isDone) dot.textContent = '✓';
+      item.appendChild(dot);
+
+      const lbl = document.createElement('div');
+      lbl.className = 'step-label-sm' + (isActive ? ' active' : '');
+      lbl.innerHTML = label.replace('\n', '<br>');
+      item.appendChild(lbl);
+
+      item.onclick = () => goToStep(n);
+      wrap.appendChild(item);
+    });
+  }
+
+  /* ===== STEP NAVIGATION ===== */
+  function goToStep(n) {
+    if (n < 1 || n > 7) return;
+
+    // hide all
+    document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+    // show target
+    const target = document.getElementById('step-' + n);
+    if (target) target.classList.remove('hidden');
+
+    // update proto btns
+    document.querySelectorAll('.proto-btn').forEach(btn => {
+      btn.classList.toggle('active', parseInt(btn.dataset.step) === n);
+    });
+
+    currentStep = n;
+    renderStepper(n);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ===== TOGGLE INLINE PANEL ===== */
+  function togglePanel(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden');
+  }
+
+  /* ===== CARD SELECTION ===== */
+  function selectCard(group, card) {
+    card.closest('.sel-card-row, .color-grid')
+        .querySelectorAll('.sel-card, .color-card')
+        .forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+  }
+
+  /* ===== DELIVERY METHOD SELECTION ===== */
+  function selectDelivery(card, showAddress) {
+    document.querySelectorAll('.delivery-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    const addrSec   = document.getElementById('delivery-address-section');
+    const sealSec   = document.getElementById('sealing-section');
+    if (addrSec) showAddress ? addrSec.classList.remove('hidden') : addrSec.classList.add('hidden');
+    if (sealSec) showAddress ? sealSec.classList.remove('hidden') : sealSec.classList.add('hidden');
+  }
+
+  /* ===== FONT SELECTION ===== */
+  function selectFont(card, name) {
+    document.querySelectorAll('.font-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+  }
+
+  const FONT_STYLE_MAP = {
+    '美文字1':   "font-family:'YuMincho','Yu Mincho',serif;",
+    '美文字2':   "font-family:'HiraMinProN-W3','Hiragino Mincho ProN',serif;",
+    '男性文字1': "font-family:'YuGothic','Yu Gothic',sans-serif;font-weight:bold;",
+    '男性文字2': "font-family:'HiraKakuProN-W6',sans-serif;",
+    '男性文字3': "font-family:serif;font-weight:bold;letter-spacing:3px;",
+    '男性文字4': "font-family:'YuMincho',serif;font-weight:bold;",
+    '男性文字5': "font-family:serif;letter-spacing:2px;",
+    '女性文字1': "font-family:'HiraMinProN-W3',serif;font-weight:100;letter-spacing:3px;",
+    '女性文字2': "font-family:serif;font-weight:100;",
+    '女性文字3': "font-family:'HiraKakuProN-W3',sans-serif;font-weight:100;letter-spacing:2px;",
+    '女性文字4': "font-family:'HiraMinProN-W3',serif;letter-spacing:1px;",
+  };
+
+  function showFontDetail(name, sub) {
+    document.getElementById('fontModalName').textContent = name;
+    document.getElementById('fontModalSub').textContent  = sub;
+    const sampleEl = document.getElementById('fontModalSample');
+    const extraStyle = FONT_STYLE_MAP[name] || '';
+    sampleEl.setAttribute('style',
+      'writing-mode:vertical-rl;font-size:14px;letter-spacing:4px;line-height:2;color:#333;' + extraStyle
+    );
+    document.getElementById('fontModal').classList.add('open');
+  }
+
+  function closeFontModal() {
+    document.getElementById('fontModal').classList.remove('open');
+  }
+
+  /* ===== 文面パターン ===== */
+  const CIRCLE_NUMS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
+  const MAX_PATTERNS = 5;
+  let patternSeq = 1;
+
+  function updatePatternBtn() {
+    const count = document.querySelectorAll('#pattern-blocks .pattern-block').length;
+    document.getElementById('add-pattern-btn').style.display = count >= MAX_PATTERNS ? 'none' : '';
+  }
+
+  function addPatternBlock() {
+    const count = document.querySelectorAll('#pattern-blocks .pattern-block').length;
+    if (count >= MAX_PATTERNS) return;
+    patternSeq++;
+    const container = document.getElementById('pattern-blocks');
+    const block = document.createElement('div');
+    block.className = 'pattern-block';
+    block.innerHTML = `
+      <div class="pattern-block-head">
+        <span class="pattern-block-label">文面パターン${CIRCLE_NUMS[patternSeq - 1] || patternSeq}</span>
+        <button class="btn-sm-danger" onclick="deletePatternBlock(this)">削除する</button>
+      </div>
+      <div class="register-row" style="margin-bottom:10px;">
+        <span style="font-size:13px;color:#444;">保存済みデータを使用</span>
+        <select class="form-select" style="min-width:200px;"><option value="">選択してください</option></select>
+        <button class="btn btn-primary" onclick="openTextModal()">登録する</button>
+      </div>
+      <div class="register-row">
+        <span style="font-size:13px;color:#444;">送付先リストをアップロード</span>
+        <button class="btn-file">ファイルを選択</button>
+      </div>
+    `;
+    container.appendChild(block);
+    updatePatternBtn();
+  }
+
+  function deletePatternBlock(btn) {
+    btn.closest('.pattern-block').remove();
+    updatePatternBtn();
+  }
+
+  /* ===== 同梱物 ===== */
+  let enclosureSeq = 0;
+
+  function updateEnclosureMemo() {
+    const count = document.querySelectorAll('#enclosure-blocks .enclosure-block').length;
+    document.getElementById('enclosure-memo').style.display = count > 0 ? '' : 'none';
+  }
+
+  function addEnclosureBlock() {
+    enclosureSeq++;
+    const id = 'enc' + enclosureSeq;
+    const container = document.getElementById('enclosure-blocks');
+    const block = document.createElement('div');
+    block.className = 'enclosure-block';
+    block.innerHTML = `
+      <div class="enclosure-block-head">
+        <span class="enclosure-block-title">同梱物${CIRCLE_NUMS[enclosureSeq - 1] || enclosureSeq}</span>
+        <button class="btn-sm-danger" onclick="deleteEnclosureBlock(this)">削除する</button>
+      </div>
+      <div class="sub-row">
+        <span class="sub-label">同梱物のタイプを選択</span>
+        <div class="radio-row">
+          <label class="radio-item" onclick="radioSelect(this,'${id}-type')"><span class="radio-dot on"></span> チラシ</label>
+          <label class="radio-item" onclick="radioSelect(this,'${id}-type')"><span class="radio-dot"></span> 名刺</label>
+          <label class="radio-item" onclick="radioSelect(this,'${id}-type')"><span class="radio-dot"></span> クリアファイル <span style="font-size:11px;color:#888;">※角2のみ</span></label>
+        </div>
+      </div>
+      <div class="sub-row">
+        <span class="sub-label">支給方法を選択</span>
+        <div class="radio-row">
+          <label class="radio-item" onclick="radioSelect(this,'${id}-supply')"><span class="radio-dot"></span> 現物支給されたものを同梱</label>
+          <label class="radio-item" onclick="radioSelect(this,'${id}-supply')"><span class="radio-dot on"></span> 弊社（エクネス）にて印刷して同梱</label>
+        </div>
+      </div>
+      <div class="sub-row">
+        <span class="sub-label">印刷形式を選択</span>
+        <div class="radio-row">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <label class="radio-item" onclick="radioSelect(this,'${id}-color')"><span class="radio-dot"></span> カラー</label>
+            <label class="radio-item" onclick="radioSelect(this,'${id}-color')"><span class="radio-dot on"></span> モノクロ</label>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;margin-left:20px;">
+            <label class="radio-item" onclick="radioSelect(this,'${id}-side')"><span class="radio-dot"></span> 両面</label>
+            <label class="radio-item" onclick="radioSelect(this,'${id}-side')"><span class="radio-dot on"></span> 片面</label>
+          </div>
+        </div>
+      </div>
+      <div class="sub-row">
+        <span class="sub-label">印刷PDFファイルアップロード</span>
+        <button class="btn-file">ファイルを選択</button>
+      </div>
+    `;
+    container.appendChild(block);
+    updateEnclosureMemo();
+  }
+
+  function deleteEnclosureBlock(btn) {
+    btn.closest('.enclosure-block').remove();
+    updateEnclosureMemo();
+  }
+
+  function openTextModal() {
+    document.getElementById('textModal').classList.add('open');
+  }
+
+  function closeTextModal() {
+    document.getElementById('textModal').classList.remove('open');
+  }
+
+  function openShippingModal() {
+    document.getElementById('shippingModal').classList.add('open');
+  }
+
+  function closeShippingModal() {
+    document.getElementById('shippingModal').classList.remove('open');
+  }
+
+  function openSenderModal() {
+    document.getElementById('senderModal').classList.add('open');
+  }
+
+  function closeSenderModal() {
+    document.getElementById('senderModal').classList.remove('open');
+  }
+
+  /* ===== OPTION CARD TOGGLE ===== */
+  function toggleOptCard(headEl) {
+    const box  = headEl.querySelector('.chk-box');
+    const card = headEl.closest('.opt-card');
+    const isOn = box.classList.contains('on');
+    box.classList.toggle('on', !isOn);
+    box.textContent = isOn ? '　' : '✓';
+    card.classList.toggle('checked-card', !isOn);
+  }
+
+  /* ===== RADIO SELECT ===== */
+  function radioSelect(label, group) {
+    const container = label.closest('.radio-row, .sub-row');
+    if (container) {
+      container.querySelectorAll('.radio-dot').forEach(d => d.classList.remove('on'));
+    }
+    label.querySelector('.radio-dot').classList.add('on');
+  }
+
+  /* ===== INIT ===== */
+  renderStepper(1);
+
+  /* ===== DROPDOWN ===== */
+  (function() {
+    const ut = document.getElementById('userTrigger');
+    const ud = document.getElementById('userDropdown');
+    if (ut) {
+      ut.addEventListener('click', function(e) { e.stopPropagation(); ud.classList.toggle('open'); });
+      document.addEventListener('click', function() { ud.classList.remove('open'); });
+    }
+  })();
+</script>
+
+<!-- 文面登録モーダル -->
+<div class="font-modal-overlay" id="textModal" onclick="if(event.target===this)closeTextModal()">
+  <div class="font-modal-card" style="width:600px;">
+    <button class="font-modal-close" onclick="closeTextModal()">×</button>
+    <div class="font-modal-head">
+      <span class="font-modal-name">文面の登録</span>
+    </div>
+    <div class="form-grid" style="max-width:100%;margin-bottom:16px;">
+      <span class="form-label">文面の名前</span>
+      <input class="form-input" type="text" placeholder="例：お礼の手紙（パターンA）">
+    </div>
+    <div style="margin-bottom:16px;">
+      <label class="chk" style="cursor:pointer;">
+        <span class="chk-box on">✓</span>
+        <span>文頭に宛名を追加する</span>
+        <button class="info-btn" style="margin-left:6px;">?</button>
+      </label>
+    </div>
+    <div>
+      <div style="font-size:13px;color:#444;margin-bottom:8px;">
+        本文を入力
+        <button class="info-btn" style="margin-left:6px;">?</button>
+      </div>
+      <div class="custom-tag-row">
+        <button class="custom-tag">カスタム題名1</button>
+        <button class="custom-tag">カスタム題名2</button>
+        <button class="custom-tag">カスタム題名3</button>
+        <button class="custom-tag">カスタム題名4</button>
+        <button class="preview-btn">文面プレビュー</button>
+      </div>
+      <textarea class="body-textarea" placeholder="本文をここに入力してください。" style="min-height:160px;"></textarea>
+      <div class="char-count">○○文字</div>
+    </div>
+    <div style="margin-top:24px;text-align:center;">
+      <button class="btn-next" style="width:auto;padding:12px 56px;" onclick="closeTextModal()">保存して閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- 納期表モーダル -->
+<div class="font-modal-overlay" id="shippingModal" onclick="if(event.target===this)closeShippingModal()">
+  <div class="font-modal-card" style="width:460px;">
+    <button class="font-modal-close" onclick="closeShippingModal()">×</button>
+    <div class="font-modal-head">
+      <span class="font-modal-name">納期表</span>
+    </div>
+    <p style="font-size:13px;color:#555;line-height:1.8;margin-bottom:16px;">送付通数をもとに納期を算出しています。営業日換算となりますのでご注意ください。</p>
+    <table class="ship-table" style="width:100%;">
+      <thead>
+        <tr><th>送付通数</th><th>納期<br><span style="font-size:10px;font-weight:normal;">※データ入稿日起算</span></th></tr>
+      </thead>
+      <tbody>
+        <tr><td>50〜200</td><td>5営業日</td></tr>
+        <tr><td>201〜400</td><td>5営業日</td></tr>
+        <tr><td>401〜600</td><td>5営業日</td></tr>
+        <tr><td>601〜800</td><td>6営業日</td></tr>
+        <tr><td>801〜1000</td><td>7営業日</td></tr>
+        <tr><td>1001〜2000</td><td>8営業日</td></tr>
+        <tr><td>2001〜3000</td><td>9営業日</td></tr>
+        <tr><td>3001〜4000</td><td>10営業日</td></tr>
+        <tr><td>4001〜6000</td><td>11営業日</td></tr>
+        <tr><td>6001〜8000</td><td>12営業日</td></tr>
+        <tr><td>8001〜10000</td><td>13営業日</td></tr>
+        <tr><td>10001〜15000</td><td>17営業日</td></tr>
+        <tr><td>15001〜20000</td><td>22営業日</td></tr>
+        <tr><td>20001〜30000</td><td>33営業日</td></tr>
+        <tr><td>30001〜40000</td><td>44営業日</td></tr>
+        <tr><td>40001〜50000</td><td>55営業日</td></tr>
+        <tr><td>50001〜60000</td><td>66営業日</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 差出人情報モーダル -->
+<div class="font-modal-overlay" id="senderModal" onclick="if(event.target===this)closeSenderModal()">
+  <div class="font-modal-card" style="width:560px;">
+    <button class="font-modal-close" onclick="closeSenderModal()">×</button>
+    <div class="font-modal-head">
+      <span class="font-modal-name">差出人情報の登録</span>
+    </div>
+    <div class="form-grid" style="max-width:100%;">
+      <span class="form-label">差出人（氏名）</span>
+      <input class="form-input" type="text" placeholder="例：山田 太郎">
+      <span class="form-label">役職（肩書）</span>
+      <input class="form-input" type="text" placeholder="例：代表取締役">
+      <span class="form-label">会社名</span>
+      <input class="form-input" type="text" placeholder="例：株式会社〇〇">
+      <span class="form-label">郵便番号</span>
+      <div class="input-row">
+        <input class="form-input" type="text" style="width:160px;" placeholder="例：916-0037">
+        <button class="btn btn-outline" style="white-space:nowrap;">郵便番号検索</button>
+      </div>
+      <span class="form-label">都道府県</span>
+      <select class="form-select">
+        <option value="">選択してください</option>
+        <option>北海道</option><option>青森県</option><option>岩手県</option><option>宮城県</option>
+        <option>秋田県</option><option>山形県</option><option>福島県</option><option>茨城県</option>
+        <option>栃木県</option><option>群馬県</option><option>埼玉県</option><option>千葉県</option>
+        <option>東京都</option><option>神奈川県</option><option>新潟県</option><option>富山県</option>
+        <option>石川県</option><option>福井県</option><option>山梨県</option><option>長野県</option>
+        <option>岐阜県</option><option>静岡県</option><option>愛知県</option><option>三重県</option>
+        <option>滋賀県</option><option>京都府</option><option>大阪府</option><option>兵庫県</option>
+        <option>奈良県</option><option>和歌山県</option><option>鳥取県</option><option>島根県</option>
+        <option>岡山県</option><option>広島県</option><option>山口県</option><option>徳島県</option>
+        <option>香川県</option><option>愛媛県</option><option>高知県</option><option>福岡県</option>
+        <option>佐賀県</option><option>長崎県</option><option>熊本県</option><option>大分県</option>
+        <option>宮崎県</option><option>鹿児島県</option><option>沖縄県</option>
+      </select>
+      <span class="form-label">市町村・番地</span>
+      <input class="form-input" type="text" placeholder="例：千代田区千代田1-1-1">
+      <span class="form-label">建物名など</span>
+      <input class="form-input" type="text" placeholder="例：〇〇ビル2F（任意）">
+    </div>
+    <div style="margin-top:24px;text-align:center;">
+      <button class="btn-next" style="width:auto;padding:12px 56px;" onclick="closeSenderModal()">保存して閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- 筆跡モーダル -->
+<div class="font-modal-overlay" id="fontModal" onclick="if(event.target===this)closeFontModal()">
+  <div class="font-modal-card">
+    <button class="font-modal-close" onclick="closeFontModal()">×</button>
+    <div class="font-modal-head">
+      <span id="fontModalName" class="font-modal-name">美文字1</span>
+      <span id="fontModalSub" class="font-modal-sub">整った印象／フォーマル</span>
+    </div>
+    <div id="fontModalDesc" class="font-modal-desc">説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明説明</div>
+    <div class="font-modal-sample">
+      <div id="fontModalSample" class="font-modal-sample-text">いつもお世話になっております。先日はありがとうございました。今後ともよろしくお願い致します。</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

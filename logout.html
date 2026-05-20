@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ログアウト | ロボットレターWEB注文システム</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="logout-page">
+  <header class="header">
+    <div class="header-logo">ロボットレターWEB注文システム</div>
+    <div class="header-user">
+      <div class="user-trigger" id="userTrigger">
+        <div class="user-avatar"></div>
+        <span class="user-name">テストテスト様</span>
+        <span class="dropdown-arrow">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="profile.html">ユーザー情報</a>
+        <a href="password-change.html">パスワードの変更</a>
+        <a href="logout.html">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="logout-content">
+    <div class="logout-card">
+      <h2>ご利用いただきありがとうございました</h2>
+      <p>ボタンを押すとログアウトが完了いたします。<br>またのご利用をお待ちしております。</p>
+      <a href="index.html" class="btn-danger">ログアウトする</a>
+      <a class="btn-cancel-link" onclick="history.back()">ログアウトしない</a>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ページが見つかりません | ロボットレターWEB注文システム</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .error-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      padding: 60px 24px;
+      text-align: center;
+    }
+    .error-code {
+      font-size: 80px;
+      font-weight: bold;
+      color: #d4e8d4;
+      line-height: 1;
+      margin-bottom: 12px;
+      letter-spacing: -2px;
+    }
+    .error-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 16px;
+    }
+    .error-desc {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.8;
+      max-width: 440px;
+      margin-bottom: 36px;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-logo">ロボットレターWEB注文システム</div>
+    <div class="header-user">
+      <div class="user-trigger" id="userTrigger">
+        <div class="user-avatar"></div>
+        <span class="user-name">テストテスト様</span>
+        <span class="dropdown-arrow">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="profile.html">ユーザー情報</a>
+        <a href="password-change.html">パスワードの変更</a>
+        <a href="logout.html">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="入稿作成_統合.html" class="nav-item">新規注文作成</a>
+        <a href="order-list.html" class="nav-item">注文一覧</a>
+        <a href="sender-info.html" class="nav-item">差出人情報</a>
+        <a href="template-list.html" class="nav-item">文面パターン</a>
+      </nav>
+      <div class="plan-info">
+        <div class="plan-label">プレミアムプラン<br>(2026/01/15まで)</div>
+        <div class="plan-badge">
+          <span>残り通数</span>
+          <strong>10,000</strong>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content" style="display:flex; overflow:auto;">
+      <div class="error-wrap">
+        <div class="error-code">404</div>
+        <div class="error-title">お探しのページは見つかりませんでした。</div>
+        <div class="error-desc">
+          アクセスしようとしたページは存在しないか、移動・削除された可能性があります。<br>
+          URLをご確認の上、もう一度お試しください。
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/common.js"></script>
+</body>
+</html>
