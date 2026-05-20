@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>画面一覧 | ロボットレターWEB注文システム プロトタイプ</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      background: #f4f4f2;
+      color: #1a1a1a;
+      padding: 40px 24px;
+    }
+    .page-header {
+      max-width: 900px;
+      margin: 0 auto 36px;
+    }
+    .page-header h1 {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .page-header p {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.7;
+    }
+    .sections {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .section {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+    .section-header {
+      padding: 14px 24px;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+    }
+    .section-header.auth  { background: #6b6b6b; color: #fff; }
+    .section-header.user  { background: #3d6b3d; color: #fff; }
+    .section-header.admin { background: #364b72; color: #fff; }
+    .screen-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+    }
+    .screen-item {
+      display: flex;
+      flex-direction: column;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      border-right: 1px solid #f0f0f0;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s;
+    }
+    .screen-item:hover { background: #f8f8f6; }
+    .screen-item:nth-child(3n) { border-right: none; }
+    .screen-no {
+      font-size: 10px;
+      color: #bbb;
+      margin-bottom: 4px;
+      font-family: monospace;
+    }
+    .screen-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+    .screen-name.user-color  { color: #3d6b3d; }
+    .screen-name.admin-color { color: #364b72; }
+    .screen-file {
+      font-size: 11px;
+      color: #aaa;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>ロボットレターWEB注文システム　画面一覧</h1>
+    <p>プロトタイプに含まれる全画面の一覧です。各画面名をクリックすると対象の画面に遷移します。</p>
+  </div>
+
+  <div class="sections">
+
+    <!-- 認証・共通 -->
+    <div class="section">
+      <div class="section-header auth">認証・共通</div>
+      <div class="screen-list">
+
+        <a class="screen-item" href="index.html">
+          <span class="screen-no">AUTH-01</span>
+          <span class="screen-name">ログイン</span>
+          <span class="screen-file">index.html</span>
+        </a>
+
+        <a class="screen-item" href="password-reset-request.html">
+          <span class="screen-no">AUTH-02</span>
+          <span class="screen-name">パスワード再設定リクエスト</span>
+          <span class="screen-file">password-reset-request.html</span>
+        </a>
+
+        <a class="screen-item" href="password-reset-sent.html">
+          <span class="screen-no">AUTH-03</span>
+          <span class="screen-name">パスワード再設定メール送信完了</span>
+          <span class="screen-file">password-reset-sent.html</span>
+        </a>
+
+        <a class="screen-item" href="password-reset.html">
+          <span class="screen-no">AUTH-04</span>
+          <span class="screen-name">パスワード再設定</span>
+          <span class="screen-file">password-reset.html</span>
+        </a>
+
+        <a class="screen-item" href="initial-password.html">
+          <span class="screen-no">AUTH-05</span>
+          <span class="screen-name">初回パスワード設定</span>
+          <span class="screen-file">initial-password.html</span>
+        </a>
+
+        <a class="screen-item" href="logout.html">
+          <span class="screen-no">AUTH-06</span>
+          <span class="screen-name">ログアウト</span>
+          <span class="screen-file">logout.html</span>
+        </a>
+
+        <a class="screen-item" href="error-loggedout.html">
+          <span class="screen-no">AUTH-07</span>
+          <span class="screen-name">エラー（ログイン前）</span>
+          <span class="screen-file">error-loggedout.html</span>
+        </a>
+
+        <a class="screen-item" href="error.html">
+          <span class="screen-no">AUTH-08</span>
+          <span class="screen-name">エラー（ログイン後）</span>
+          <span class="screen-file">error.html</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ユーザー側 -->
+    <div class="section">
+      <div class="section-header user">ユーザー側</div>
+      <div class="screen-list">
+
+        <a class="screen-item" href="入稿作成_統合.html">
+          <span class="screen-no">USER-01</span>
+          <span class="screen-name user-color">新規注文作成</span>
+          <span class="screen-file">入稿作成_統合.html</span>
+        </a>
+
+        <a class="screen-item" href="order-new.html">
+          <span class="screen-no">USER-02</span>
+          <span class="screen-name user-color">注文内容確認</span>
+          <span class="screen-file">order-new.html</span>
+        </a>
+
+        <a class="screen-item" href="order-complete.html">
+          <span class="screen-no">USER-03</span>
+          <span class="screen-name user-color">注文完了</span>
+          <span class="screen-file">order-complete.html</span>
+        </a>
+
+        <a class="screen-item" href="order-list.html">
+          <span class="screen-no">USER-04</span>
+          <span class="screen-name user-color">注文一覧</span>
+          <span class="screen-file">order-list.html</span>
+        </a>
+
+        <a class="screen-item" href="注文詳細_統合.html">
+          <span class="screen-no">USER-05</span>
+          <span class="screen-name user-color">注文詳細</span>
+          <span class="screen-file">注文詳細_統合.html</span>
+        </a>
+
+        <a class="screen-item" href="sender-info.html">
+          <span class="screen-no">USER-06</span>
+          <span class="screen-name user-color">差出人情報一覧</span>
+          <span class="screen-file">sender-info.html</span>
+        </a>
+
+        <a class="screen-item" href="sender-info-create.html">
+          <span class="screen-no">USER-07</span>
+          <span class="screen-name user-color">差出人情報　新規作成</span>
+          <span class="screen-file">sender-info-create.html</span>
+        </a>
+
+        <a class="screen-item" href="sender-info-edit.html">
+          <span class="screen-no">USER-08</span>
+          <span class="screen-name user-color">差出人情報　編集</span>
+          <span class="screen-file">sender-info-edit.html</span>
+        </a>
+
+        <a class="screen-item" href="template-list.html">
+          <span class="screen-no">USER-09</span>
+          <span class="screen-name user-color">文面パターン一覧</span>
+          <span class="screen-file">template-list.html</span>
+        </a>
+
+        <a class="screen-item" href="template-create.html">
+          <span class="screen-no">USER-10</span>
+          <span class="screen-name user-color">文面パターン　新規作成</span>
+          <span class="screen-file">template-create.html</span>
+        </a>
+
+        <a class="screen-item" href="template-edit.html">
+          <span class="screen-no">USER-11</span>
+          <span class="screen-name user-color">文面パターン　編集</span>
+          <span class="screen-file">template-edit.html</span>
+        </a>
+
+        <a class="screen-item" href="profile.html">
+          <span class="screen-no">USER-12</span>
+          <span class="screen-name user-color">ユーザー情報</span>
+          <span class="screen-file">profile.html</span>
+        </a>
+
+        <a class="screen-item" href="password-change.html">
+          <span class="screen-no">USER-13</span>
+          <span class="screen-name user-color">パスワード変更</span>
+          <span class="screen-file">password-change.html</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- 管理者（社内担当者）側 -->
+    <div class="section">
+      <div class="section-header admin">管理者（社内担当者）側</div>
+      <div class="screen-list">
+
+        <a class="screen-item" href="admin/order-list.html">
+          <span class="screen-no">ADMIN-01</span>
+          <span class="screen-name admin-color">受注一覧</span>
+          <span class="screen-file">admin/order-list.html</span>
+        </a>
+
+        <a class="screen-item" href="admin/order-detail.html">
+          <span class="screen-no">ADMIN-02</span>
+          <span class="screen-name admin-color">受注詳細</span>
+          <span class="screen-file">admin/order-detail.html</span>
+        </a>
+
+        <a class="screen-item" href="admin/company-list.html">
+          <span class="screen-no">ADMIN-03</span>
+          <span class="screen-name admin-color">企業一覧</span>
+          <span class="screen-file">admin/company-list.html</span>
+        </a>
+
+        <a class="screen-item" href="admin/user-list.html">
+          <span class="screen-no">ADMIN-04</span>
+          <span class="screen-name admin-color">ユーザー一覧（企業別）</span>
+          <span class="screen-file">admin/user-list.html</span>
+        </a>
+
+        <a class="screen-item" href="admin/staff-list.html">
+          <span class="screen-no">ADMIN-05</span>
+          <span class="screen-name admin-color">社内担当者一覧</span>
+          <span class="screen-file">admin/staff-list.html</span>
+        </a>
+
+        <a class="screen-item" href="admin/profile.html">
+          <span class="screen-no">ADMIN-06</span>
+          <span class="screen-name admin-color">ユーザー情報（担当者）</span>
+          <span class="screen-file">admin/profile.html</span>
+        </a>
+
+        <a class="screen-item" href="admin/password-change.html">
+          <span class="screen-no">ADMIN-07</span>
+          <span class="screen-name admin-color">パスワード変更（担当者）</span>
+          <span class="screen-file">admin/password-change.html</span>
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
