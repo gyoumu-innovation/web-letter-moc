@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>商品マスタ テーブル構造案</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; padding: 32px; color: #1a202c; }
+
+    h1 { font-size: 20px; margin-bottom: 8px; color: #2d3748; }
+    .subtitle { font-size: 13px; color: #718096; margin-bottom: 32px; }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #4a5568;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 32px 0 12px;
+    }
+
+    .tables-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .table-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+      min-width: 280px;
+      flex: 1;
+    }
+
+    .table-header {
+      padding: 12px 16px;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .table-header .table-name { font-size: 15px; }
+    .table-header .table-label { font-size: 11px; font-weight: 400; opacity: 0.8; }
+
+    .master  .table-header { background: #4299e1; color: white; }
+    .company .table-header { background: #48bb78; color: white; }
+    .order   .table-header { background: #ed8936; color: white; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      background: #f7fafc;
+      padding: 8px 12px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: #718096;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    td { padding: 8px 12px; border-bottom: 1px solid #f0f4f8; }
+    tr:last-child td { border-bottom: none; }
+
+    .pk   { color: #e53e3e; font-weight: 700; font-size: 11px; }
+    .fk   { color: #3182ce; font-weight: 700; font-size: 11px; }
+    .type { color: #718096; font-size: 12px; font-family: monospace; }
+    .note { color: #a0aec0; font-size: 11px; }
+
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+    .badge-pk  { background: #fed7d7; color: #c53030; }
+    .badge-fk  { background: #bee3f8; color: #2b6cb0; }
+    .badge-null { background: #e2e8f0; color: #718096; }
+    .badge-uq  { background: #fefcbf; color: #975a16; }
+
+    .arrow-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 8px;
+      color: #a0aec0;
+      font-size: 22px;
+      align-self: center;
+    }
+
+    .relation-note {
+      font-size: 11px;
+      color: #718096;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    .example-section {
+      margin-top: 40px;
+    }
+    .example-tables {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .example-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+      flex: 1;
+      min-width: 240px;
+    }
+    .example-header {
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      background: #edf2f7;
+      color: #4a5568;
+    }
+    .example-header span { font-weight: 400; font-size: 11px; color: #a0aec0; margin-left: 6px; }
+    .example-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .example-table th { background: #f7fafc; padding: 6px 12px; font-size: 11px; color: #718096; border-bottom: 1px solid #e2e8f0; text-align: left; }
+    .example-table td { padding: 6px 12px; border-bottom: 1px solid #f7fafc; }
+    .example-table tr:last-child td { border-bottom: none; }
+    .hl { background: #ebf8ff; }
+    .hl2 { background: #f0fff4; }
+
+    .logic-box {
+      background: #2d3748;
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-top: 24px;
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.9;
+    }
+    .logic-box .comment { color: #68d391; }
+    .logic-box .keyword { color: #63b3ed; }
+    .logic-box .table  { color: #f6ad55; }
+    .logic-box .col    { color: #e2e8f0; }
+  </style>
+</head>
+<body>
+
+  <h1>商品マスタ テーブル構造案</h1>
+  <p class="subtitle">得意先ごとに商品・価格を管理できる構成</p>
+
+  <!-- マスタテーブル群 -->
+  <div class="section-title">マスタ（商品定義）</div>
+  <div class="tables-row">
+
+    <!-- m_product_categories -->
+    <div class="table-card master">
+      <div class="table-header">
+        <div>
+          <div class="table-name">m_product_categories</div>
+          <div class="table-label">商品カテゴリマスタ</div>
+        </div>
+      </div>
+      <table>
+        <tr><th>カラム名</th><th>型</th><th>説明</th></tr>
+        <tr>
+          <td>id <span class="badge badge-pk">PK</span></td>
+          <td class="type">INT</td>
+          <td class="note">—</td>
+        </tr>
+        <tr>
+          <td>code</td>
+          <td class="type">VARCHAR(50)</td>
+          <td class="note">envelope / stationery / option / enclosure</td>
+        </tr>
+        <tr>
+          <td>name</td>
+          <td class="type">VARCHAR(100)</td>
+          <td class="note">封筒・便箋・オプション…</td>
+        </tr>
+        <tr>
+          <td>display_order</td>
+          <td class="type">INT</td>
+          <td class="note">表示順</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- m_products -->
+    <div class="table-card master">
+      <div class="table-header">
+        <div>
+          <div class="table-name">m_products</div>
+          <div class="table-label">商品マスタ</div>
+        </div>
+      </div>
+      <table>
+        <tr><th>カラム名</th><th>型</th><th>説明</th></tr>
+        <tr>
+          <td>id <span class="badge badge-pk">PK</span></td>
+          <td class="type">INT</td>
+          <td class="note">—</td>
+        </tr>
+        <tr>
+          <td>category_id <span class="badge badge-fk">FK</span></td>
+          <td class="type">INT</td>
+          <td class="note">→ m_product_categories</td>
+        </tr>
+        <tr>
+          <td>name</td>
+          <td class="type">VARCHAR(100)</td>
+          <td class="note">大礼紙・角2封筒…</td>
+        </tr>
+        <tr>
+          <td>base_price</td>
+          <td class="type">INT</td>
+          <td class="note">デフォルト加算価格（円）</td>
+        </tr>
+        <tr>
+          <td>condition_note</td>
+          <td class="type">VARCHAR(200)</td>
+          <td class="note">「角2封筒のみ」などの注記 <span class="badge badge-null">NULL可</span></td>
+        </tr>
+        <tr>
+          <td>is_active</td>
+          <td class="type">BOOLEAN</td>
+          <td class="note">有効フラグ</td>
+        </tr>
+        <tr>
+          <td>display_order</td>
+          <td class="type">INT</td>
+          <td class="note">表示順</td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- 得意先別設定 -->
+  <div class="section-title">得意先別設定（上書き）</div>
+  <div class="tables-row">
+
+    <div class="table-card company">
+      <div class="table-header">
+        <div>
+          <div class="table-name">company_products</div>
+          <div class="table-label">得意先別商品設定</div>
+        </div>
+      </div>
+      <table>
+        <tr><th>カラム名</th><th>型</th><th>説明</th></tr>
+        <tr>
+          <td>id <span class="badge badge-pk">PK</span></td>
+          <td class="type">INT</td>
+          <td class="note">—</td>
+        </tr>
+        <tr>
+          <td>company_id <span class="badge badge-fk">FK</span></td>
+          <td class="type">INT</td>
+          <td class="note">→ companies</td>
+        </tr>
+        <tr>
+          <td>product_id <span class="badge badge-fk">FK</span></td>
+          <td class="type">INT</td>
+          <td class="note">→ m_products</td>
+        </tr>
+        <tr>
+          <td>is_available</td>
+          <td class="type">BOOLEAN</td>
+          <td class="note">この得意先で表示するか</td>
+        </tr>
+        <tr>
+          <td>custom_price</td>
+          <td class="type">INT</td>
+          <td class="note">価格上書き <span class="badge badge-null">NULL=デフォルト継承</span></td>
+        </tr>
+        <tr>
+          <td>UNIQUE</td>
+          <td class="type">—</td>
+          <td class="note"><span class="badge badge-uq">UQ</span> (company_id, product_id)</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="flex:1; min-width:240px;">
+      <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+        <div style="font-size:13px; font-weight:700; color:#4a5568; margin-bottom:12px;">継承ルール</div>
+        <div style="font-size:13px; color:#4a5568; line-height:2;">
+          <div>① <code>company_products</code> にレコードなし</div>
+          <div style="padding-left:16px; color:#718096;">→ 全商品デフォルト公開</div>
+          <div style="margin-top:8px;">② <code>is_available = FALSE</code></div>
+          <div style="padding-left:16px; color:#718096;">→ この得意先では非表示</div>
+          <div style="margin-top:8px;">③ <code>custom_price</code> に値あり</div>
+          <div style="padding-left:16px; color:#718096;">→ base_price を上書き</div>
+          <div style="margin-top:8px;">④ <code>custom_price = NULL</code></div>
+          <div style="padding-left:16px; color:#718096;">→ base_price をそのまま使用</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 注文時スナップショット -->
+  <div class="section-title">注文時スナップショット（既存テーブル・変更なし）</div>
+  <div class="tables-row">
+    <div class="table-card order">
+      <div class="table-header">
+        <div>
+          <div class="table-name">order_envelope_specs</div>
+          <div class="table-label">注文時封筒仕様（スナップショット）</div>
+        </div>
+      </div>
+      <table>
+        <tr><th>カラム名</th><th>型</th><th>説明</th></tr>
+        <tr>
+          <td>id <span class="badge badge-pk">PK</span></td>
+          <td class="type">INT</td>
+          <td class="note">—</td>
+        </tr>
+        <tr>
+          <td>order_id <span class="badge badge-fk">FK</span></td>
+          <td class="type">INT</td>
+          <td class="note">→ orders</td>
+        </tr>
+        <tr>
+          <td>product_id <span class="badge badge-fk">FK</span></td>
+          <td class="type">INT</td>
+          <td class="note">→ m_products（参照のみ）</td>
+        </tr>
+        <tr>
+          <td>product_name</td>
+          <td class="type">VARCHAR(100)</td>
+          <td class="note">注文時点の名称コピー</td>
+        </tr>
+        <tr>
+          <td>price_at_order</td>
+          <td class="type">INT</td>
+          <td class="note">注文時点の価格コピー</td>
+        </tr>
+      </table>
+    </div>
+    <div style="flex:1; min-width:240px;">
+      <div style="background:white; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+        <div style="font-size:13px; font-weight:700; color:#4a5568; margin-bottom:12px;">なぜスナップショットが必要か</div>
+        <div style="font-size:13px; color:#718096; line-height:1.9;">
+          商品マスタを後から変更しても、<br>
+          過去の注文内容・価格は変わらないようにするため。<br><br>
+          <code>m_products</code> の値は「今の定義」、<br>
+          <code>order_*_specs</code> の値は「その時の事実」。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- データ例 -->
+  <div class="example-section">
+    <div class="section-title">データイメージ</div>
+    <div class="example-tables">
+
+      <div class="example-card">
+        <div class="example-header">m_products <span>商品マスタ（抜粋）</span></div>
+        <table class="example-table">
+          <tr><th>id</th><th>category</th><th>name</th><th>base_price</th></tr>
+          <tr><td>1</td><td>envelope</td><td>大礼紙</td><td>0</td></tr>
+          <tr><td>2</td><td>envelope</td><td>桜花</td><td>0</td></tr>
+          <tr><td>3</td><td>option</td><td>角2封筒</td><td>150</td></tr>
+          <tr><td>4</td><td>option</td><td>タイトル追加</td><td>20</td></tr>
+          <tr><td>5</td><td>option</td><td>QRコードシール</td><td>0</td></tr>
+        </table>
+      </div>
+
+      <div class="example-card">
+        <div class="example-header">company_products <span>得意先A の設定</span></div>
+        <table class="example-table">
+          <tr><th>company_id</th><th>product_id</th><th>is_available</th><th>custom_price</th></tr>
+          <tr class="hl"><td>A</td><td>3（角2封筒）</td><td>FALSE</td><td>NULL</td></tr>
+          <tr class="hl2"><td>A</td><td>5（QRコード）</td><td>TRUE</td><td>50</td></tr>
+        </table>
+        <div style="padding:10px 12px; font-size:12px; color:#718096; background:#f7fafc;">
+          → 得意先Aは角2封筒が非表示、QRコードは+50円
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SQLイメージ -->
+  <div class="section-title">商品一覧を組み立てるクエリイメージ</div>
+  <div class="logic-box">
+    <span class="comment">-- 得意先A向けの有効な商品一覧を取得</span><br>
+    <span class="keyword">SELECT</span>
+    <span class="col">  p.id, p.name,</span><br>
+    <span class="col">  COALESCE(cp.custom_price, p.base_price) </span><span class="keyword">AS</span><span class="col"> price,</span><br>
+    <span class="col">  COALESCE(cp.is_available, </span><span class="keyword">TRUE</span><span class="col">) </span><span class="keyword">AS</span><span class="col"> is_available</span><br>
+    <span class="keyword">FROM</span>   <span class="table">m_products</span><span class="col"> p</span><br>
+    <span class="keyword">LEFT JOIN</span> <span class="table">company_products</span><span class="col"> cp</span><br>
+    <span class="col">       </span><span class="keyword">ON</span><span class="col"> cp.product_id = p.id</span><br>
+    <span class="col">      </span><span class="keyword">AND</span><span class="col"> cp.company_id = </span><span class="comment">:company_id</span><br>
+    <span class="keyword">WHERE</span><span class="col"> p.is_active = </span><span class="keyword">TRUE</span><br>
+    <span class="keyword">AND</span><span class="col">   COALESCE(cp.is_available, </span><span class="keyword">TRUE</span><span class="col">) = </span><span class="keyword">TRUE</span><br>
+    <span class="keyword">ORDER BY</span><span class="col"> p.display_order</span>
+  </div>
+
+</body>
+</html>
