@@ -268,7 +268,7 @@
         ログイン状態を保持する
       </label>
 
-      <a href="入稿作成_統合.html" class="btn-login btn-login-user">ログイン</a>
+      <a href="入稿作成_統合.html" class="btn-login btn-login-user" id="btn-login-user" onclick="loginUser(event)">ログイン</a>
 
       <div class="login-footer">
         <a href="password-reset-request.html">パスワードをお忘れの方はこちら</a>
@@ -324,6 +324,11 @@
   </div>
 
   <script>
+    function loginUser(e) {
+      e.preventDefault();
+      window.location.href = window.innerWidth <= 640 ? 'order-list.html' : '入稿作成_統合.html';
+    }
+
     function switchTab(type) {
       const tabUser  = document.getElementById('tab-user');
       const tabAdmin = document.getElementById('tab-admin');

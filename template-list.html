@@ -93,11 +93,16 @@
     .btn-delete { width:100%; padding:12px; background:#c0392b; color:#fff; border:none; border-radius:4px; font-size:15px; cursor:pointer; font-family:inherit; }
     .btn-delete:hover { background:#a93226; }
     .modal-cancel-link { display:block; text-align:center; margin-top:12px; font-size:13px; color:#3d6b3d; cursor:pointer; text-decoration:underline; }
+
+    @media (max-width: 640px) {
+      .pattern-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
   <header class="header">
     <div class="header-logo">ロボットレターWEB注文システム</div>
+    <div class="header-remaining">残り <strong>10,000</strong> 通</div>
     <div class="header-user">
       <div class="user-trigger" id="userTrigger">
         <div class="user-avatar"></div>
@@ -229,6 +234,21 @@
       <a class="modal-cancel-link" onclick="closeModal('deleteModal')">削除しない</a>
     </div>
   </div>
+
+  <nav class="mobile-bottom-nav">
+    <a href="order-list.html" class="mobile-nav-item">
+      <span class="mobile-nav-icon">📋</span>
+      <span>注文一覧</span>
+    </a>
+    <a href="sender-info.html" class="mobile-nav-item">
+      <span class="mobile-nav-icon">👤</span>
+      <span>差出人情報</span>
+    </a>
+    <a href="profile.html" class="mobile-nav-item">
+      <span class="mobile-nav-icon">⚙️</span>
+      <span>アカウント</span>
+    </a>
+  </nav>
 
   <script src="js/common.js"></script>
   <script>

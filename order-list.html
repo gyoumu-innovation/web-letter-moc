@@ -154,11 +154,58 @@
     .result-count { font-size: 12px; color: #888; margin-bottom: 12px; }
     .empty-state { text-align: center; padding: 60px; color: #aaa; font-size: 14px; grid-column: 1/-1; }
     .hidden { display: none !important; }
+
+    @media (max-width: 640px) {
+      /* 注文カード: 1カラム */
+      .order-grid { grid-template-columns: 1fr; }
+
+      /* 下書きカードの「編集する」は非表示（入稿フォームはPC専用） */
+      .order-card[data-status="下書き"] .order-card-foot .btn-card:not(.btn-card-danger) {
+        display: none;
+      }
+
+      /* タブ: 横スクロールをやめて2行×3列グリッドに */
+      .tab-bar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        margin-bottom: 16px;
+      }
+      .tab-btn {
+        border-radius: 4px !important;
+        border: 1px solid #c8d8c8 !important;
+        font-size: 12px;
+        padding: 8px 4px;
+        text-align: center;
+      }
+      .tab-btn + .tab-btn { border-left: 1px solid #c8d8c8 !important; }
+
+      /* 絞り込みエリア: 縦積み */
+      .filter-area { flex-direction: column; padding: 12px; gap: 10px; }
+      .filter-item {
+        flex-wrap: wrap;
+        white-space: normal;
+        gap: 6px;
+      }
+      /* ラベルを1行目に固定 */
+      .filter-item > span:first-child {
+        flex-basis: 100%;
+        font-size: 12px;
+        color: #777;
+      }
+      /* 日付インプットは横並びに */
+      .filter-date { flex: 1; min-width: 80px; width: auto; }
+      .range-sep { align-self: center; }
+      /* テキスト検索インプットは全幅 */
+      .filter-input { flex: 1; min-width: 0; width: 100%; }
+      .btn-search { width: 100%; padding: 10px; }
+    }
   </style>
 </head>
 <body>
   <header class="header">
     <div class="header-logo">ロボットレターWEB注文システム</div>
+    <div class="header-remaining">残り <strong>10,000</strong> 通</div>
     <div class="header-user">
       <div class="user-trigger" id="userTrigger">
         <div class="user-avatar"></div>
@@ -399,6 +446,21 @@
       </div>
     </main>
   </div>
+
+  <nav class="mobile-bottom-nav">
+    <a href="order-list.html" class="mobile-nav-item active">
+      <span class="mobile-nav-icon">📋</span>
+      <span>注文一覧</span>
+    </a>
+    <a href="sender-info.html" class="mobile-nav-item">
+      <span class="mobile-nav-icon">👤</span>
+      <span>差出人情報</span>
+    </a>
+    <a href="profile.html" class="mobile-nav-item">
+      <span class="mobile-nav-icon">⚙️</span>
+      <span>アカウント</span>
+    </a>
+  </nav>
 
   <script src="js/common.js"></script>
   <script>
